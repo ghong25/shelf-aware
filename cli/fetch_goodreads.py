@@ -1,135 +1,46 @@
 #!/usr/bin/env python3
-"""Fetch a user's Goodreads reading history from RSS and enrich via OpenLibrary."""
+"""Fetch a user's Goodreads reading history from RSS."""
 
+import csv
 import json
+import os
 import re
 import sys
 import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
+from pathlib import Path
 
 import httpx
 
-# ---------------------------------------------------------------------------
-# Genre taxonomy
-# ---------------------------------------------------------------------------
 
-GENRE_TAXONOMY = [
-    "Literary Fiction",
-    "Science Fiction",
-    "Fantasy",
-    "Mystery/Thriller",
-    "Romance",
-    "Horror",
-    "Historical Fiction",
-    "Contemporary Fiction",
-    "Young Adult",
-    "Children's",
-    "Biography/Memoir",
-    "History",
-    "Science",
-    "Philosophy",
-    "Psychology",
-    "Self-Help",
-    "Business",
-    "Poetry",
-    "Art/Design",
-    "Travel",
-    "Religion/Spirituality",
-    "Politics",
-    "True Crime",
-    "Humor",
-    "Other",
-]
+def _load_dotenv() -> None:
+    """Load .env file from project root into os.environ (simple parser)."""
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    if not env_path.exists():
+        return
+    with open(env_path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip()
+            # Strip surrounding quotes if present
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+                value = value[1:-1]
+            os.environ.setdefault(key, value)
 
-# Maps lowercase keyword fragments found in OpenLibrary subjects to taxonomy.
-# Order matters: first match wins, so put more specific patterns before general.
-_GENRE_KEYWORDS: list[tuple[str, str]] = [
-    # Fiction sub-genres
-    ("science fiction", "Science Fiction"),
-    ("sci-fi", "Science Fiction"),
-    ("scifi", "Science Fiction"),
-    ("fantasy", "Fantasy"),
-    ("mystery", "Mystery/Thriller"),
-    ("thriller", "Mystery/Thriller"),
-    ("suspense", "Mystery/Thriller"),
-    ("detective", "Mystery/Thriller"),
-    ("crime fiction", "Mystery/Thriller"),
-    ("romance", "Romance"),
-    ("love stories", "Romance"),
-    ("horror", "Horror"),
-    ("gothic", "Horror"),
-    ("historical fiction", "Historical Fiction"),
-    ("young adult", "Young Adult"),
-    ("ya ", "Young Adult"),
-    ("teen", "Young Adult"),
-    ("children", "Children's"),
-    ("juvenile", "Children's"),
-    ("picture book", "Children's"),
-    ("literary fiction", "Literary Fiction"),
-    ("contemporary fiction", "Contemporary Fiction"),
-    ("general fiction", "Contemporary Fiction"),
-    ("fiction", "Literary Fiction"),  # generic fallback for fiction
 
-    # Non-fiction
-    ("true crime", "True Crime"),
-    ("biography", "Biography/Memoir"),
-    ("memoir", "Biography/Memoir"),
-    ("autobiography", "Biography/Memoir"),
-    ("history", "History"),
-    ("historical", "History"),
-    ("science", "Science"),
-    ("physics", "Science"),
-    ("biology", "Science"),
-    ("chemistry", "Science"),
-    ("mathematics", "Science"),
-    ("astronomy", "Science"),
-    ("evolution", "Science"),
-    ("neuroscience", "Science"),
-    ("philosophy", "Philosophy"),
-    ("ethics", "Philosophy"),
-    ("psychology", "Psychology"),
-    ("mental health", "Psychology"),
-    ("psychiatry", "Psychology"),
-    ("self-help", "Self-Help"),
-    ("self help", "Self-Help"),
-    ("personal development", "Self-Help"),
-    ("motivation", "Self-Help"),
-    ("productivity", "Self-Help"),
-    ("business", "Business"),
-    ("economics", "Business"),
-    ("management", "Business"),
-    ("entrepreneurship", "Business"),
-    ("finance", "Business"),
-    ("investing", "Business"),
-    ("marketing", "Business"),
-    ("poetry", "Poetry"),
-    ("poems", "Poetry"),
-    ("art", "Art/Design"),
-    ("design", "Art/Design"),
-    ("photography", "Art/Design"),
-    ("architecture", "Art/Design"),
-    ("travel", "Travel"),
-    ("religion", "Religion/Spirituality"),
-    ("spiritual", "Religion/Spirituality"),
-    ("theology", "Religion/Spirituality"),
-    ("buddhism", "Religion/Spirituality"),
-    ("christianity", "Religion/Spirituality"),
-    ("islam", "Religion/Spirituality"),
-    ("meditation", "Religion/Spirituality"),
-    ("politics", "Politics"),
-    ("political", "Politics"),
-    ("government", "Politics"),
-    ("humor", "Humor"),
-    ("comedy", "Humor"),
-    ("satire", "Humor"),
-    ("funny", "Humor"),
-]
-
+_load_dotenv()
 
 # ---------------------------------------------------------------------------
 # Core functions
 # ---------------------------------------------------------------------------
+
+# Slim CSV columns — the minimal set AI agents need for analysis
+SLIM_COLUMNS = ["title", "author", "user_rating", "average_rating", "date_read", "year_published"]
 
 
 def extract_user_id(url_or_id: str) -> str:
@@ -194,15 +105,10 @@ def _float_or_zero(value: str) -> float:
 def detect_private_profile(response_text: str) -> bool:
     """Check whether an RSS response indicates a private profile.
 
-    Returns True if the response has no <item> elements or contains error
-    indicators suggesting the profile is private.
+    Returns True if the response has no <item> elements and no channel title,
+    which indicates the feed is inaccessible.
     """
     if not response_text or not response_text.strip():
-        return True
-
-    # Look for common error signals
-    lower = response_text.lower()
-    if "private" in lower and "profile" in lower:
         return True
 
     # If there's valid XML but zero items and no channel title, treat as private
@@ -222,7 +128,7 @@ def detect_private_profile(response_text: str) -> bool:
 
 
 def fetch_rss_page(
-    user_id: str, page: int, client: httpx.Client
+    user_id: str, page: int, client: httpx.Client, shelf: str = "read"
 ) -> tuple[list[dict], str]:
     """Fetch one page of a user's read-shelf RSS and parse book data.
 
@@ -231,7 +137,7 @@ def fetch_rss_page(
     """
     url = (
         f"https://www.goodreads.com/review/list_rss/{user_id}"
-        f"?shelf=read&page={page}"
+        f"?shelf={shelf}&page={page}"
     )
 
     response = client.get(url, timeout=15.0)
@@ -296,132 +202,70 @@ def fetch_rss_page(
 def fetch_all_books(user_id: str) -> tuple[list[dict], str]:
     """Paginate through all pages of a user's read shelf.
 
+    Uses GOODREADS_COOKIE env var for authenticated access to private profiles.
+    Tries the #ALL# shelf first (works better with auth), falls back to 'read'.
+
     Returns (deduplicated_books, user_name).
     """
     all_books: list[dict] = []
     seen_ids: set[str] = set()
     user_name = ""
-    page = 1
+
+    headers = {"User-Agent": "shelf-aware/0.1 (book-stats CLI)"}
+    cookie = os.environ.get("GOODREADS_COOKIE", "")
+    if cookie:
+        headers["Cookie"] = cookie
+        print("Using authenticated session.", file=sys.stderr)
+
+    # Try read shelf first; fall back to #ALL# with auth
+    shelves_to_try = (["read", "%23ALL%23"] if cookie else ["read"])
 
     with httpx.Client(
-        headers={"User-Agent": "shelf-aware/0.1 (book-stats CLI)"},
+        headers=headers,
         follow_redirects=True,
     ) as client:
-        while True:
-            print(f"Fetching RSS page {page}...", file=sys.stderr)
-            books, name = fetch_rss_page(user_id, page, client)
+        for shelf in shelves_to_try:
+            page = 1
+            all_books = []
+            seen_ids = set()
+            user_name = ""
 
-            if name and not user_name:
-                user_name = name
+            try:
+                while True:
+                    print(f"Fetching RSS page {page} (shelf={shelf})...", file=sys.stderr)
+                    books, name = fetch_rss_page(user_id, page, client, shelf=shelf)
 
-            if not books:
+                    if name and not user_name:
+                        user_name = name
+
+                    if not books:
+                        break
+
+                    for book in books:
+                        bid = book["book_id"]
+                        if bid and bid not in seen_ids:
+                            seen_ids.add(bid)
+                            all_books.append(book)
+
+                    page += 1
+                    time.sleep(1)  # polite delay between pages
+
+            except (PermissionError, httpx.HTTPStatusError) as exc:
+                if shelf != shelves_to_try[-1]:
+                    print(f"Shelf {shelf} failed ({exc}), trying next...", file=sys.stderr)
+                    continue
+                raise
+
+            if all_books:
                 break
-
-            for book in books:
-                bid = book["book_id"]
-                if bid and bid not in seen_ids:
-                    seen_ids.add(bid)
-                    all_books.append(book)
-
-            page += 1
-            time.sleep(1)  # polite delay between pages
+            elif shelf != shelves_to_try[-1]:
+                print(f"No books on shelf {shelf}, trying next...", file=sys.stderr)
 
     print(
         f"Fetched {len(all_books)} unique books across {page - 1} page(s).",
         file=sys.stderr,
     )
     return all_books, user_name
-
-
-def normalize_genres(subjects: list[str]) -> list[str]:
-    """Map raw OpenLibrary subject strings to a clean genre taxonomy.
-
-    Returns a deduplicated list of matched genre categories, preserving the
-    order in which they were first matched.
-    """
-    matched: list[str] = []
-    seen: set[str] = set()
-
-    for subject in subjects:
-        lower = subject.lower()
-        for keyword, genre in _GENRE_KEYWORDS:
-            if keyword in lower and genre not in seen:
-                seen.add(genre)
-                matched.append(genre)
-                break  # one match per subject string
-
-    return matched if matched else ["Other"]
-
-
-def enrich_with_openlibrary(
-    books: list[dict],
-) -> tuple[list[dict], list[str]]:
-    """Enrich books with genre and page-count data from OpenLibrary.
-
-    Returns (enriched_books, errors).
-    """
-    errors: list[str] = []
-    books_with_isbn = [(i, b) for i, b in enumerate(books) if b.get("isbn")]
-    total = len(books_with_isbn)
-
-    if total == 0:
-        print("No books with ISBNs to enrich.", file=sys.stderr)
-        for book in books:
-            book.setdefault("genres", ["Other"])
-            book.setdefault("page_count", None)
-        return books, errors
-
-    print(f"Enriching {total} books via OpenLibrary...", file=sys.stderr)
-
-    with httpx.Client(
-        headers={"User-Agent": "shelf-aware/0.1 (book-stats CLI)"},
-        follow_redirects=True,
-        timeout=5.0,
-    ) as client:
-        for idx, (pos, book) in enumerate(books_with_isbn):
-            isbn = book["isbn"]
-            url = f"https://openlibrary.org/isbn/{isbn}.json"
-            try:
-                resp = client.get(url)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    raw_subjects = data.get("subjects", [])
-                    book["genres"] = normalize_genres(raw_subjects)
-                    book["page_count"] = data.get("number_of_pages")
-                elif resp.status_code == 404:
-                    book["genres"] = ["Other"]
-                    book["page_count"] = None
-                else:
-                    msg = (
-                        f"OpenLibrary returned {resp.status_code} for "
-                        f"ISBN {isbn} ({book['title']})"
-                    )
-                    errors.append(msg)
-                    print(f"  Warning: {msg}", file=sys.stderr)
-                    book["genres"] = ["Other"]
-                    book["page_count"] = None
-            except httpx.HTTPError as exc:
-                msg = f"HTTP error enriching ISBN {isbn} ({book['title']}): {exc}"
-                errors.append(msg)
-                print(f"  Warning: {msg}", file=sys.stderr)
-                book["genres"] = ["Other"]
-                book["page_count"] = None
-
-            # Progress indicator every 10 books
-            if (idx + 1) % 10 == 0 or (idx + 1) == total:
-                print(
-                    f"  Enriched {idx + 1}/{total} books.",
-                    file=sys.stderr,
-                )
-
-            time.sleep(0.5)  # polite delay between requests
-
-    # Fill defaults for books without ISBNs
-    for book in books:
-        book.setdefault("genres", ["Other"])
-        book.setdefault("page_count", None)
-
-    return books, errors
 
 
 # ---------------------------------------------------------------------------
@@ -459,27 +303,47 @@ def main() -> None:
 
     if not books:
         print("No books found on the read shelf.", file=sys.stderr)
+        sys.exit(1)
 
-    # Enrich with OpenLibrary data
-    books, errors = enrich_with_openlibrary(books)
+    # Save to data/<name_id>/
+    project_root = Path(__file__).resolve().parent.parent
+    safe_name = re.sub(r"[^\w-]", "_", user_name.lower()).strip("_") if user_name else "unknown"
+    dir_name = f"{safe_name}_{user_id}"
+    data_dir = project_root / "data" / dir_name
+    data_dir.mkdir(parents=True, exist_ok=True)
 
-    # Build output
+    # Full JSON (for web frontend / storage)
     output = {
         "user_id": user_id,
         "user_name": user_name,
         "fetch_date": datetime.now(timezone.utc).isoformat(),
         "book_count": len(books),
         "books": books,
-        "errors": errors,
     }
+    json_path = data_dir / "books.json"
+    with open(json_path, "w") as f:
+        json.dump(output, f, indent=2, ensure_ascii=False)
+        f.write("\n")
 
-    json.dump(output, sys.stdout, indent=2, ensure_ascii=False)
-    sys.stdout.write("\n")
+    # Slim CSV (for AI agents)
+    csv_path = data_dir / "books.csv"
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=SLIM_COLUMNS, extrasaction="ignore")
+        writer.writeheader()
+        for book in books:
+            # Normalize date_read to just YYYY-MM-DD
+            row = {k: book.get(k, "") for k in SLIM_COLUMNS}
+            if row["date_read"]:
+                try:
+                    dt = datetime.strptime(row["date_read"], "%a, %d %b %Y %H:%M:%S %z")
+                    row["date_read"] = dt.strftime("%Y-%m-%d")
+                except ValueError:
+                    pass
+            writer.writerow(row)
 
-    print(
-        f"\nDone. {len(books)} books exported with {len(errors)} error(s).",
-        file=sys.stderr,
-    )
+    print(f"\nSaved {len(books)} books to:", file=sys.stderr)
+    print(f"  {json_path} (full)", file=sys.stderr)
+    print(f"  {csv_path} (slim for AI)", file=sys.stderr)
 
 
 if __name__ == "__main__":

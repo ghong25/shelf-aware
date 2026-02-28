@@ -142,9 +142,9 @@
             <p class="font-semibold text-amber-900">Archetype: {{ ai.psychological.archetype }}</p>
         </div>
         {% endif %}
-        {% if ai.psychological.values %}
+        {% if ai.psychological['values'] %}
         <h3>Core Values</h3>
-        <ul>{% for v in ai.psychological.values %}<li>{{ v }}</li>{% endfor %}</ul>
+        <ul>{% for v in ai.psychological['values'] %}<li>{{ v }}</li>{% endfor %}</ul>
         {% endif %}
         {% if ai.psychological.traits %}
         <h3>Personality Traits</h3>
