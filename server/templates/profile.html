@@ -384,7 +384,12 @@
                 {% endfor %}
             </div>
             {% endif %}
-            {% if ai.roast.guilty_pleasures %}
+            {% if ai.roast.most_revealing_pattern %}
+            <div class="mb-4">
+                <h4 class="font-semibold text-orange-800 dark:text-orange-200 mb-2">Most Revealing Pattern</h4>
+                <p class="text-orange-700 dark:text-orange-300">{{ ai.roast.most_revealing_pattern }}</p>
+            </div>
+            {% elif ai.roast.guilty_pleasures %}
             <div class="mb-4">
                 <h4 class="font-semibold text-orange-800 dark:text-orange-200 mb-2">Guilty Pleasures</h4>
                 <div class="flex flex-wrap gap-2">
