@@ -1,15 +1,18 @@
-// Shelf Aware - Chart.js rendering functions
+// Shelf Aware - Chart.js rendering functions (warm palette)
 
 const COLORS = {
-    primary: '#44403c',    // stone-700
-    secondary: '#78716c',  // stone-500
-    accent: '#d97706',     // amber-600
-    grid: '#e7e5e4',       // stone-200
+    primary: '#6B5E50',    // warm-500
+    secondary: '#9C8E7C',  // warm-400
+    accent: '#B45309',     // rich amber
+    grid: '#E8E0D4',       // warm-200
     palette: [
-        '#d97706', '#0891b2', '#7c3aed', '#dc2626',
-        '#059669', '#db2777', '#2563eb', '#ca8a04',
+        '#B45309', '#0E7490', '#7C3AED', '#DC2626',
+        '#047857', '#BE185D', '#1D4ED8', '#A16207',
     ],
 };
+
+Chart.defaults.font.family = 'Inter, system-ui, sans-serif';
+Chart.defaults.color = COLORS.primary;
 
 const defaultOptions = {
     responsive: true,
@@ -18,8 +21,15 @@ const defaultOptions = {
         legend: { display: false },
     },
     scales: {
-        x: { grid: { color: COLORS.grid } },
-        y: { grid: { color: COLORS.grid }, beginAtZero: true },
+        x: {
+            grid: { color: COLORS.grid },
+            ticks: { color: COLORS.secondary },
+        },
+        y: {
+            grid: { color: COLORS.grid },
+            ticks: { color: COLORS.secondary },
+            beginAtZero: true,
+        },
     },
 };
 
@@ -34,7 +44,7 @@ function renderBar(canvasId, chartData, label, color) {
                 label: label || 'Count',
                 data: chartData.values,
                 backgroundColor: color || COLORS.accent,
-                borderRadius: 4,
+                borderRadius: 6,
             }],
         },
         options: defaultOptions,
@@ -52,10 +62,11 @@ function renderLine(canvasId, chartData, label) {
                 label: label || 'Books',
                 data: chartData.values,
                 borderColor: COLORS.accent,
-                backgroundColor: COLORS.accent + '33',
+                backgroundColor: COLORS.accent + '22',
                 fill: true,
                 tension: 0.3,
-                pointRadius: 2,
+                pointRadius: 3,
+                pointBackgroundColor: COLORS.accent,
             }],
         },
         options: defaultOptions,
@@ -71,9 +82,10 @@ function renderRadar(canvasId, chartData) {
             labels: chartData.labels,
             datasets: [{
                 data: chartData.values,
-                backgroundColor: COLORS.accent + '44',
+                backgroundColor: COLORS.accent + '33',
                 borderColor: COLORS.accent,
                 pointBackgroundColor: COLORS.accent,
+                borderWidth: 2,
             }],
         },
         options: {
@@ -84,7 +96,11 @@ function renderRadar(canvasId, chartData) {
                 r: {
                     beginAtZero: true,
                     grid: { color: COLORS.grid },
-                    pointLabels: { font: { size: 11 } },
+                    angleLines: { color: COLORS.grid },
+                    pointLabels: {
+                        font: { size: 11, family: 'Inter, system-ui, sans-serif' },
+                        color: COLORS.primary,
+                    },
                 },
             },
         },
@@ -100,7 +116,8 @@ function renderScatter(canvasId, points) {
             datasets: [{
                 data: points,
                 backgroundColor: COLORS.accent + 'aa',
-                pointRadius: 4,
+                pointRadius: 5,
+                pointHoverRadius: 7,
             }],
         },
         options: {
@@ -117,8 +134,8 @@ function renderScatter(canvasId, points) {
                 },
             },
             scales: {
-                x: { title: { display: true, text: 'Average Rating' }, grid: { color: COLORS.grid } },
-                y: { title: { display: true, text: 'Your Rating' }, grid: { color: COLORS.grid }, beginAtZero: true, max: 5 },
+                x: { title: { display: true, text: 'Average Rating', color: COLORS.secondary }, grid: { color: COLORS.grid }, ticks: { color: COLORS.secondary } },
+                y: { title: { display: true, text: 'Your Rating', color: COLORS.secondary }, grid: { color: COLORS.grid }, ticks: { color: COLORS.secondary }, beginAtZero: true, max: 5 },
             },
         },
     });
@@ -175,16 +192,18 @@ function renderDualRadar(canvasId, chartData, labelA, labelB) {
                 {
                     label: labelA || 'Reader A',
                     data: chartData.values_a,
-                    backgroundColor: COLORS.accent + '44',
+                    backgroundColor: COLORS.accent + '33',
                     borderColor: COLORS.accent,
                     pointBackgroundColor: COLORS.accent,
+                    borderWidth: 2,
                 },
                 {
                     label: labelB || 'Reader B',
                     data: chartData.values_b,
-                    backgroundColor: COLORS.palette[1] + '44',
+                    backgroundColor: COLORS.palette[1] + '33',
                     borderColor: COLORS.palette[1],
                     pointBackgroundColor: COLORS.palette[1],
+                    borderWidth: 2,
                 },
             ],
         },
@@ -196,7 +215,11 @@ function renderDualRadar(canvasId, chartData, labelA, labelB) {
                 r: {
                     beginAtZero: true,
                     grid: { color: COLORS.grid },
-                    pointLabels: { font: { size: 11 } },
+                    angleLines: { color: COLORS.grid },
+                    pointLabels: {
+                        font: { size: 11, family: 'Inter, system-ui, sans-serif' },
+                        color: COLORS.primary,
+                    },
                 },
             },
         },
@@ -215,13 +238,13 @@ function renderDualBar(canvasId, chartData, labelA, labelB) {
                     label: labelA || 'Reader A',
                     data: chartData.values_a,
                     backgroundColor: COLORS.accent,
-                    borderRadius: 4,
+                    borderRadius: 6,
                 },
                 {
                     label: labelB || 'Reader B',
                     data: chartData.values_b,
                     backgroundColor: COLORS.palette[1],
-                    borderRadius: 4,
+                    borderRadius: 6,
                 },
             ],
         },

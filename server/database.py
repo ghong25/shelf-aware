@@ -39,7 +39,9 @@ async def get_profile(goodreads_id: str) -> dict | None:
 
 async def get_recent_profiles(limit: int = 12) -> list[dict]:
     rows = await get_pool().fetch(
-        """SELECT goodreads_id, username, book_count, created_at, updated_at
+        """SELECT goodreads_id, username, book_count, created_at, updated_at,
+                  ai_psychological->>'archetype' AS archetype,
+                  stats_json->'genre_radar'->>'top_genre' AS top_genre
            FROM profiles ORDER BY updated_at DESC LIMIT $1""",
         limit,
     )

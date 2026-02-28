@@ -3,262 +3,336 @@
 {% block title %}{{ profile.username or profile.goodreads_id }} - Shelf Aware{% endblock %}
 
 {% block content %}
-<div class="mb-8">
-    <h1 class="text-3xl font-bold">{{ profile.username or profile.goodreads_id }}</h1>
-    <p class="text-stone-500">{{ profile.book_count }} books analyzed</p>
+<!-- ==================== HERO IDENTITY CARD ==================== -->
+<div class="hero-identity p-8 md:p-10 mb-8">
+    <div class="text-center md:text-left">
+        <h1 class="text-4xl md:text-5xl font-display font-bold text-warm-800">{{ profile.username or profile.goodreads_id }}</h1>
+
+        {% if ai.get('psychological') and ai.psychological.archetype %}
+        <div class="inline-block mt-3 bg-amber-100 border border-amber-300 rounded-full px-4 py-1.5">
+            <span class="text-amber-800 font-semibold text-sm">{{ ai.psychological.archetype }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Key Stats Row -->
+        <div class="flex flex-wrap justify-center md:justify-start gap-6 mt-6">
+            <div>
+                <p class="text-2xl font-bold text-warm-800">{{ profile.book_count }}</p>
+                <p class="text-warm-400 text-sm">Books Read</p>
+            </div>
+            {% if stats.get('hater_hype') %}
+            <div>
+                <p class="text-2xl font-bold text-warm-800">{{ stats.hater_hype.label }}</p>
+                <p class="text-warm-400 text-sm">Rating Style</p>
+            </div>
+            {% endif %}
+            {% if stats.get('attention_span') %}
+            <div>
+                <p class="text-2xl font-bold text-warm-800">{{ stats.attention_span.avg_pages|int }}</p>
+                <p class="text-warm-400 text-sm">Avg Pages</p>
+            </div>
+            {% endif %}
+            {% if stats.get('genre_radar') %}
+            <div>
+                <p class="text-2xl font-bold text-warm-800">{{ stats.genre_radar.top_genre }}</p>
+                <p class="text-warm-400 text-sm">Top Genre</p>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if ai.get('roast') and ai.roast.one_liner %}
+        <div class="mt-6 bg-warm-50 rounded-lg px-5 py-3 inline-block max-w-2xl">
+            <p class="text-warm-500 italic font-display">"{{ ai.roast.one_liner }}"</p>
+        </div>
+        {% endif %}
+    </div>
 </div>
 
-<!-- Tabs -->
-<div class="border-b border-stone-200 mb-6">
-    <nav class="flex gap-1 -mb-px" id="profile-tabs">
-        <button class="tab-btn active px-4 py-2 text-sm font-medium border-b-2 border-stone-800 text-stone-800"
-                data-tab="overview">Overview</button>
-        {% if ai.get('psychological') %}
-        <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700"
-                data-tab="psychological">Psych Profile</button>
-        {% endif %}
-        {% if ai.get('roast') %}
-        <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700"
-                data-tab="roast">Roast</button>
-        {% endif %}
-        {% if ai.get('vibe_check') %}
-        <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700"
-                data-tab="vibe_check">Vibe Check</button>
-        {% endif %}
-        {% if ai.get('red_green_flags') %}
-        <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700"
-                data-tab="flags">Flags</button>
-        {% endif %}
-        {% if ai.get('blind_spots') %}
-        <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700"
-                data-tab="blind_spots">Blind Spots</button>
-        {% endif %}
-        {% if ai.get('reading_evolution') %}
-        <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700"
-                data-tab="evolution">Evolution</button>
+<!-- ==================== STICKY SECTION NAV ==================== -->
+<nav class="section-nav" id="section-nav">
+    <div class="section-nav-inner">
+        <a href="#section-numbers" class="section-nav-item active" data-section="section-numbers">Numbers</a>
+        <a href="#section-genres" class="section-nav-item" data-section="section-genres">Genres</a>
+        <a href="#section-timeline" class="section-nav-item" data-section="section-timeline">Timeline</a>
+        {% if ai.get('psychological') or ai.get('vibe_check') or ai.get('red_green_flags') or ai.get('roast') or ai.get('blind_spots') or ai.get('reading_evolution') %}
+        <a href="#section-ai" class="section-nav-item" data-section="section-ai">AI Insights</a>
         {% endif %}
         {% if ai.get('recommendations') %}
-        <button class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-stone-500 hover:text-stone-700"
-                data-tab="recommendations">Recs</button>
+        <a href="#section-recs" class="section-nav-item" data-section="section-recs">Recommendations</a>
         {% endif %}
-    </nav>
-</div>
+    </div>
+</nav>
 
-<!-- Overview Tab -->
-<div class="tab-panel" id="panel-overview">
-    <!-- Key Metrics -->
+<!-- ==================== SECTION 1: BY THE NUMBERS ==================== -->
+<section id="section-numbers" class="story-section">
+    <h2 class="section-heading text-3xl mb-8">By the Numbers</h2>
+
+    <!-- Metric Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-4 text-center">
-            <p class="text-2xl font-bold">{{ profile.book_count }}</p>
-            <p class="text-stone-500 text-sm">Books Read</p>
+        <div class="metric-card">
+            <p class="metric-value">{{ profile.book_count }}</p>
+            <p class="metric-label">Books Read</p>
         </div>
         {% if stats.get('hater_hype') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-4 text-center">
-            <p class="text-2xl font-bold">{{ stats.hater_hype.label }}</p>
-            <p class="text-stone-500 text-sm">Rating Style</p>
+        <div class="metric-card">
+            <p class="metric-value">{{ stats.hater_hype.label }}</p>
+            <p class="metric-label">Rating Style</p>
         </div>
         {% endif %}
         {% if stats.get('attention_span') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-4 text-center">
-            <p class="text-2xl font-bold">{{ stats.attention_span.label }}</p>
-            <p class="text-stone-500 text-sm">Avg {{ stats.attention_span.avg_pages|int }} pages</p>
+        <div class="metric-card">
+            <p class="metric-value">{{ stats.attention_span.avg_pages|int }}p</p>
+            <p class="metric-label">Avg Length</p>
         </div>
         {% endif %}
         {% if stats.get('genre_radar') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-4 text-center">
-            <p class="text-2xl font-bold">{{ stats.genre_radar.top_genre }}</p>
-            <p class="text-stone-500 text-sm">Top Genre</p>
+        <div class="metric-card">
+            <p class="metric-value text-lg">{{ stats.genre_radar.top_genre }}</p>
+            <p class="metric-label">Top Genre</p>
         </div>
         {% endif %}
     </div>
 
-    <!-- Charts Grid -->
+    <!-- Charts: Rating Distribution + Hater vs Hype -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {% if stats.get('rating_distribution') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
-            <h3 class="font-semibold mb-3">Rating Distribution</h3>
+        <div class="card p-6">
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Rating Distribution</h3>
+            <p class="text-warm-400 text-xs mb-4">How you rate the books you read</p>
             <canvas id="chart-ratings" height="200"></canvas>
         </div>
         {% endif %}
 
+        {% if stats.get('hater_hype') %}
+        <div class="card p-6">
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Hater vs Hype <span class="text-sm font-body text-warm-400">({{ stats.hater_hype.label }})</span></h3>
+            <p class="text-warm-400 text-xs mb-4">Your rating vs the crowd's average</p>
+            <canvas id="chart-hater" height="200"></canvas>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ==================== SECTION 2: WHAT YOU READ ==================== -->
+<section id="section-genres" class="story-section">
+    <h2 class="section-heading text-3xl mb-8">What You Read</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {% if stats.get('genre_radar') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
-            <h3 class="font-semibold mb-3">Genre Radar</h3>
-            <canvas id="chart-genres" height="200"></canvas>
+        <div class="card p-6">
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Genre Radar</h3>
+            <p class="text-warm-400 text-xs mb-4">Your reading spread across genres</p>
+            <canvas id="chart-genres" height="240"></canvas>
         </div>
         {% endif %}
 
         {% if stats.get('reading_eras') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
-            <h3 class="font-semibold mb-3">Reading Eras</h3>
+        <div class="card p-6">
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Reading Eras</h3>
+            <p class="text-warm-400 text-xs mb-4">Which decades you gravitate toward</p>
             <canvas id="chart-eras" height="200"></canvas>
         </div>
         {% endif %}
+    </div>
+</section>
 
+<div class="section-divider"></div>
+
+<!-- ==================== SECTION 3: HOW YOU READ ==================== -->
+<section id="section-timeline" class="story-section">
+    <h2 class="section-heading text-3xl mb-8">How You Read</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {% if stats.get('attention_span') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
-            <h3 class="font-semibold mb-3">Attention Span</h3>
+        <div class="card p-6">
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Attention Span</h3>
+            <p class="text-warm-400 text-xs mb-4">Page count distribution of your books</p>
             <canvas id="chart-pages" height="200"></canvas>
         </div>
         {% endif %}
 
         {% if stats.get('reading_pace') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
-            <h3 class="font-semibold mb-3">Reading Pace</h3>
+        <div class="card p-6">
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Reading Pace</h3>
+            <p class="text-warm-400 text-xs mb-4">Books finished over time</p>
             <canvas id="chart-pace" height="200"></canvas>
         </div>
         {% endif %}
 
         {% if stats.get('author_loyalty') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
-            <h3 class="font-semibold mb-3">Author Loyalty</h3>
+        <div class="card p-6">
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Author Loyalty</h3>
+            <p class="text-warm-400 text-xs mb-4">Authors you keep coming back to</p>
             <canvas id="chart-authors" height="200"></canvas>
         </div>
         {% endif %}
 
-        {% if stats.get('hater_hype') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
-            <h3 class="font-semibold mb-3">Hater vs Hype ({{ stats.hater_hype.label }})</h3>
-            <canvas id="chart-hater" height="200"></canvas>
-        </div>
-        {% endif %}
-
         {% if stats.get('reading_heatmap') %}
-        <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
-            <h3 class="font-semibold mb-3">Reading Heatmap</h3>
+        <div class="card p-6">
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Reading Heatmap</h3>
+            <p class="text-warm-400 text-xs mb-4">Your reading activity over the past year</p>
             <div id="heatmap-container" class="overflow-x-auto"></div>
         </div>
         {% endif %}
     </div>
-</div>
+</section>
 
-<!-- AI Analysis Tabs -->
-{% if ai.get('psychological') %}
-<div class="tab-panel hidden" id="panel-psychological">
-    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 prose max-w-none">
-        <h2 class="text-2xl font-bold mb-4">Psychological Profile</h2>
+<!-- ==================== SECTION 4: WHO YOU ARE (AI INSIGHTS) ==================== -->
+{% if ai.get('psychological') or ai.get('vibe_check') or ai.get('red_green_flags') or ai.get('roast') or ai.get('blind_spots') or ai.get('reading_evolution') %}
+<div class="section-divider"></div>
+
+<section id="section-ai" class="story-section">
+    <h2 class="section-heading text-3xl mb-8">Who You Are</h2>
+
+    <!-- Psychological Profile -->
+    {% if ai.get('psychological') %}
+    <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-8 mb-8">
+        <h3 class="font-display font-bold text-2xl text-amber-900 mb-4">Psychological Profile</h3>
         {% if ai.psychological.archetype %}
-        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-            <p class="font-semibold text-amber-900">Archetype: {{ ai.psychological.archetype }}</p>
+        <div class="bg-white/70 border border-amber-300 rounded-lg px-5 py-3 inline-block mb-6">
+            <p class="font-display font-bold text-xl text-amber-800">{{ ai.psychological.archetype }}</p>
         </div>
         {% endif %}
         {% if ai.psychological['values'] %}
-        <h3>Core Values</h3>
-        <ul>{% for v in ai.psychological['values'] %}<li>{{ v }}</li>{% endfor %}</ul>
+        <div class="mb-4">
+            <h4 class="font-semibold text-amber-800 mb-2">Core Values</h4>
+            <div class="flex flex-wrap gap-2">
+                {% for v in ai.psychological['values'] %}
+                <span class="bg-white/60 border border-amber-200 rounded-full px-3 py-1 text-sm text-amber-800">{{ v }}</span>
+                {% endfor %}
+            </div>
+        </div>
         {% endif %}
         {% if ai.psychological.traits %}
-        <h3>Personality Traits</h3>
-        <ul>{% for t in ai.psychological.traits %}<li>{{ t }}</li>{% endfor %}</ul>
+        <div class="mb-4">
+            <h4 class="font-semibold text-amber-800 mb-2">Personality Traits</h4>
+            <div class="flex flex-wrap gap-2">
+                {% for t in ai.psychological.traits %}
+                <span class="bg-white/60 border border-amber-200 rounded-full px-3 py-1 text-sm text-amber-800">{{ t }}</span>
+                {% endfor %}
+            </div>
+        </div>
         {% endif %}
         {% if ai.psychological.searching_for %}
-        <h3>What They're Searching For</h3>
-        <p>{{ ai.psychological.searching_for }}</p>
+        <div class="mb-4">
+            <h4 class="font-semibold text-amber-800 mb-2">What You're Searching For</h4>
+            <p class="text-amber-700">{{ ai.psychological.searching_for }}</p>
+        </div>
         {% endif %}
         {% if ai.psychological.summary %}
-        <h3>Summary</h3>
-        <p>{{ ai.psychological.summary }}</p>
-        {% endif %}
-    </div>
-</div>
-{% endif %}
-
-{% if ai.get('roast') %}
-<div class="tab-panel hidden" id="panel-roast">
-    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 prose max-w-none">
-        <h2 class="text-2xl font-bold mb-4">Roast My Shelf</h2>
-        {% if ai.roast.roast %}
-        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-lg">
-            <p>{{ ai.roast.roast }}</p>
-        </div>
-        {% endif %}
-        {% if ai.roast.guilty_pleasures %}
-        <h3>Guilty Pleasures</h3>
-        <ul>{% for g in ai.roast.guilty_pleasures %}<li>{{ g }}</li>{% endfor %}</ul>
-        {% endif %}
-        {% if ai.roast.stereotype %}
-        <h3>Reader Stereotype</h3>
-        <p>{{ ai.roast.stereotype }}</p>
-        {% endif %}
-        {% if ai.roast.one_liner %}
-        <div class="bg-stone-100 rounded-lg p-4 mt-6 text-center italic text-lg">
-            "{{ ai.roast.one_liner }}"
+        <div class="mt-4">
+            <h4 class="font-semibold text-amber-800 mb-2">Summary</h4>
+            <p class="text-amber-700">{{ ai.psychological.summary }}</p>
         </div>
         {% endif %}
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-{% if ai.get('vibe_check') %}
-<div class="tab-panel hidden" id="panel-vibe_check">
-    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 prose max-w-none">
-        <h2 class="text-2xl font-bold mb-4">Vibe Check</h2>
+    <!-- Vibe Check -->
+    {% if ai.get('vibe_check') %}
+    <div class="bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-xl p-8 mb-8">
+        <h3 class="font-display font-bold text-2xl text-violet-900 mb-4">Vibe Check</h3>
         {% if ai.vibe_check.primary_aesthetic %}
-        <div class="bg-violet-50 border border-violet-200 rounded-lg p-4 mb-6">
-            <p class="font-semibold text-violet-900">Primary Aesthetic: {{ ai.vibe_check.primary_aesthetic }}</p>
+        <div class="bg-white/70 border border-violet-300 rounded-lg px-5 py-3 inline-block mb-4">
+            <p class="font-display font-bold text-lg text-violet-800">{{ ai.vibe_check.primary_aesthetic }}</p>
             {% if ai.vibe_check.secondary_aesthetic %}
-            <p class="text-violet-700">Secondary: {{ ai.vibe_check.secondary_aesthetic }}</p>
+            <p class="text-violet-600 text-sm">+ {{ ai.vibe_check.secondary_aesthetic }}</p>
             {% endif %}
         </div>
         {% endif %}
         {% if ai.vibe_check.playlist_vibe %}
-        <h3>Playlist Vibe</h3>
-        <p>{{ ai.vibe_check.playlist_vibe }}</p>
+        <div class="mb-4">
+            <h4 class="font-semibold text-violet-800 mb-1">Playlist Vibe</h4>
+            <p class="text-violet-700">{{ ai.vibe_check.playlist_vibe }}</p>
+        </div>
         {% endif %}
         {% if ai.vibe_check.bookshelf_as_place %}
-        <h3>If Your Bookshelf Were a Place</h3>
-        <p>{{ ai.vibe_check.bookshelf_as_place }}</p>
+        <div class="mb-4">
+            <h4 class="font-semibold text-violet-800 mb-1">If Your Bookshelf Were a Place</h4>
+            <p class="text-violet-700">{{ ai.vibe_check.bookshelf_as_place }}</p>
+        </div>
         {% endif %}
         {% if ai.vibe_check.summary %}
-        <p class="mt-4">{{ ai.vibe_check.summary }}</p>
+        <p class="text-violet-600 mt-4">{{ ai.vibe_check.summary }}</p>
         {% endif %}
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-{% if ai.get('red_green_flags') %}
-<div class="tab-panel hidden" id="panel-flags">
-    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 prose max-w-none">
-        <h2 class="text-2xl font-bold mb-4">Red & Green Flags</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% if ai.red_green_flags.green_flags %}
-            <div>
-                <h3 class="text-green-700">Green Flags</h3>
-                {% for flag in ai.red_green_flags.green_flags %}
-                <div class="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
-                    <p class="font-semibold text-green-800">{{ flag.flag }}</p>
-                    <p class="text-green-700 text-sm">{{ flag.evidence }}</p>
-                </div>
-                {% endfor %}
+    <!-- Red & Green Flags -->
+    {% if ai.get('red_green_flags') %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {% if ai.red_green_flags.green_flags %}
+        <div class="bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-6">
+            <h3 class="font-display font-bold text-xl text-emerald-900 mb-4">Green Flags</h3>
+            {% for flag in ai.red_green_flags.green_flags %}
+            <div class="bg-white/60 border border-emerald-200 rounded-lg p-4 mb-3 last:mb-0">
+                <p class="font-semibold text-emerald-800">{{ flag.flag }}</p>
+                <p class="text-emerald-700 text-sm mt-1">{{ flag.evidence }}</p>
             </div>
-            {% endif %}
-            {% if ai.red_green_flags.red_flags %}
-            <div>
-                <h3 class="text-red-700">Red Flags</h3>
-                {% for flag in ai.red_green_flags.red_flags %}
-                <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
-                    <p class="font-semibold text-red-800">{{ flag.flag }}</p>
-                    <p class="text-red-700 text-sm">{{ flag.evidence }}</p>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            {% endfor %}
         </div>
+        {% endif %}
+        {% if ai.red_green_flags.red_flags %}
+        <div class="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 rounded-xl p-6">
+            <h3 class="font-display font-bold text-xl text-red-900 mb-4">Red Flags</h3>
+            {% for flag in ai.red_green_flags.red_flags %}
+            <div class="bg-white/60 border border-red-200 rounded-lg p-4 mb-3 last:mb-0">
+                <p class="font-semibold text-red-800">{{ flag.flag }}</p>
+                <p class="text-red-700 text-sm mt-1">{{ flag.evidence }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-{% if ai.get('blind_spots') %}
-<div class="tab-panel hidden" id="panel-blind_spots">
-    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 prose max-w-none">
-        <h2 class="text-2xl font-bold mb-4">Blind Spots</h2>
+    <!-- Roast -->
+    {% if ai.get('roast') %}
+    <div class="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-xl p-8 mb-8">
+        <h3 class="font-display font-bold text-2xl text-orange-900 mb-4">Roast My Shelf</h3>
+        {% if ai.roast.roast %}
+        <div class="bg-white/70 border border-orange-200 rounded-lg p-5 mb-5">
+            <p class="text-orange-800 text-lg leading-relaxed">{{ ai.roast.roast }}</p>
+        </div>
+        {% endif %}
+        {% if ai.roast.guilty_pleasures %}
+        <div class="mb-4">
+            <h4 class="font-semibold text-orange-800 mb-2">Guilty Pleasures</h4>
+            <div class="flex flex-wrap gap-2">
+                {% for g in ai.roast.guilty_pleasures %}
+                <span class="bg-white/60 border border-orange-200 rounded-full px-3 py-1 text-sm text-orange-800">{{ g }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% if ai.roast.stereotype %}
+        <div class="mb-4">
+            <h4 class="font-semibold text-orange-800 mb-2">Reader Stereotype</h4>
+            <p class="text-orange-700">{{ ai.roast.stereotype }}</p>
+        </div>
+        {% endif %}
+        {% if ai.roast.one_liner %}
+        <div class="bg-warm-800 rounded-lg px-6 py-4 mt-6 text-center">
+            <p class="text-amber-300 italic font-display text-lg">"{{ ai.roast.one_liner }}"</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Blind Spots -->
+    {% if ai.get('blind_spots') %}
+    <div class="bg-gradient-to-br from-blue-50 to-sky-50 border border-blue-200 rounded-xl p-8 mb-8">
+        <h3 class="font-display font-bold text-2xl text-blue-900 mb-4">Blind Spots</h3>
         {% if ai.blind_spots.gaps %}
         {% for gap in ai.blind_spots.gaps %}
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <h3 class="text-blue-900 mt-0">{{ gap.area }}</h3>
-            <p class="text-blue-800">{{ gap.description }}</p>
+        <div class="bg-white/60 border border-blue-200 rounded-lg p-5 mb-4 last:mb-0">
+            <h4 class="font-semibold text-blue-900 text-lg">{{ gap.area }}</h4>
+            <p class="text-blue-800 mt-1">{{ gap.description }}</p>
             {% if gap.recommendations %}
-            <p class="font-semibold text-blue-900 text-sm mt-2">Try reading:</p>
-            <ul class="text-blue-700 text-sm">
+            <p class="font-semibold text-blue-900 text-sm mt-3">Try reading:</p>
+            <ul class="text-blue-700 text-sm mt-1 list-disc list-inside">
                 {% for rec in gap.recommendations %}<li>{{ rec }}</li>{% endfor %}
             </ul>
             {% endif %}
@@ -266,111 +340,161 @@
         {% endfor %}
         {% endif %}
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
-{% if ai.get('reading_evolution') %}
-<div class="tab-panel hidden" id="panel-evolution">
-    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 prose max-w-none">
-        <h2 class="text-2xl font-bold mb-4">Reading Evolution</h2>
+    <!-- Reading Evolution -->
+    {% if ai.get('reading_evolution') %}
+    <div class="bg-gradient-to-br from-warm-50 to-cream-100 border border-warm-200 rounded-xl p-8 mb-8">
+        <h3 class="font-display font-bold text-2xl text-warm-800 mb-6">Reading Evolution</h3>
         {% if ai.reading_evolution.eras %}
-        {% for era in ai.reading_evolution.eras %}
-        <div class="border-l-4 border-stone-300 pl-4 mb-6">
-            <h3 class="mt-0">{{ era.name }}</h3>
-            <p class="text-stone-500 text-sm">{{ era.period }}</p>
-            <p>{{ era.description }}</p>
+        <div class="space-y-6">
+            {% for era in ai.reading_evolution.eras %}
+            <div class="border-l-4 border-amber-400 pl-5">
+                <h4 class="font-display font-semibold text-lg text-warm-800">{{ era.name }}</h4>
+                <p class="text-warm-400 text-sm">{{ era.period }}</p>
+                <p class="text-warm-600 mt-1">{{ era.description }}</p>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
         {% endif %}
         {% if ai.reading_evolution.trajectory %}
-        <h3>Overall Trajectory</h3>
-        <p>{{ ai.reading_evolution.trajectory }}</p>
+        <div class="mt-6">
+            <h4 class="font-semibold text-warm-700 mb-1">Overall Trajectory</h4>
+            <p class="text-warm-600">{{ ai.reading_evolution.trajectory }}</p>
+        </div>
         {% endif %}
         {% if ai.reading_evolution.prediction %}
-        <div class="bg-stone-100 rounded-lg p-4 mt-4">
-            <h3 class="mt-0">What's Next?</h3>
-            <p>{{ ai.reading_evolution.prediction }}</p>
+        <div class="bg-white/60 border border-warm-200 rounded-lg p-5 mt-6">
+            <h4 class="font-display font-semibold text-warm-700 mb-1">What's Next?</h4>
+            <p class="text-warm-600">{{ ai.reading_evolution.prediction }}</p>
         </div>
         {% endif %}
     </div>
-</div>
+    {% endif %}
+</section>
 {% endif %}
 
+<!-- ==================== SECTION 5: YOUR NEXT READS ==================== -->
 {% if ai.get('recommendations') %}
-<div class="tab-panel hidden" id="panel-recommendations">
-    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 prose max-w-none">
-        <h2 class="text-2xl font-bold mb-4">Book Recommendations</h2>
+<div class="section-divider"></div>
 
-        {% if ai.recommendations.top_10 %}
-        <h3>Top 10 Picks For You</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
+<section id="section-recs" class="story-section">
+    <h2 class="section-heading text-3xl mb-8">Your Next Reads</h2>
+
+    <!-- Top 10 Picks -->
+    {% if ai.recommendations.top_10 %}
+    <div class="mb-10">
+        <h3 class="font-display font-semibold text-xl text-warm-700 mb-4">Top 10 Picks For You</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             {% for rec in ai.recommendations.top_10 %}
-            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <p class="font-semibold text-amber-900">{{ rec.title }}</p>
-                <p class="text-amber-700 text-sm">by {{ rec.author }}</p>
-                <p class="text-amber-800 text-sm mt-2">{{ rec.reason }}</p>
+            <div class="card accent-left-amber p-5">
+                <p class="font-display font-semibold text-warm-800">{{ rec.title }}</p>
+                <p class="text-warm-500 text-sm">by {{ rec.author }}</p>
+                <p class="text-warm-600 text-sm mt-2">{{ rec.reason }}</p>
             </div>
             {% endfor %}
         </div>
-        {% endif %}
-
-        {% if ai.recommendations.deep_cuts %}
-        <h3 class="mt-8">Deep Cuts</h3>
-        <p class="text-stone-500 text-sm">Lesser-known gems you'd love</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose">
-            {% for rec in ai.recommendations.deep_cuts %}
-            <div class="bg-violet-50 border border-violet-200 rounded-lg p-4">
-                <p class="font-semibold text-violet-900">{{ rec.title }}</p>
-                <p class="text-violet-700 text-sm">by {{ rec.author }}</p>
-                <p class="text-violet-800 text-sm mt-2">{{ rec.reason }}</p>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        {% if ai.recommendations.next_favorite_author %}
-        <h3 class="mt-8">Your Next Favorite Author</h3>
-        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 not-prose">
-            <p class="font-semibold text-emerald-900 text-lg">{{ ai.recommendations.next_favorite_author.name }}</p>
-            <p class="text-emerald-800 mt-1">{{ ai.recommendations.next_favorite_author.why }}</p>
-            <p class="text-emerald-700 text-sm mt-2">Start with: <strong>{{ ai.recommendations.next_favorite_author.start_with }}</strong></p>
-        </div>
-        {% endif %}
-
-        {% if ai.recommendations.wildcard %}
-        <h3 class="mt-8">Wildcard Pick</h3>
-        <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 not-prose">
-            <p class="font-semibold text-rose-900">{{ ai.recommendations.wildcard.title }}</p>
-            <p class="text-rose-700 text-sm">by {{ ai.recommendations.wildcard.author }}</p>
-            <p class="text-rose-800 text-sm mt-2">{{ ai.recommendations.wildcard.reason }}</p>
-        </div>
-        {% endif %}
     </div>
-</div>
+    {% endif %}
+
+    <!-- Deep Cuts -->
+    {% if ai.recommendations.deep_cuts %}
+    <div class="mb-10">
+        <h3 class="font-display font-semibold text-xl text-warm-700 mb-1">Deep Cuts</h3>
+        <p class="text-warm-400 text-sm mb-4">Lesser-known gems you'd love</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for rec in ai.recommendations.deep_cuts %}
+            <div class="card accent-left-violet p-5">
+                <p class="font-display font-semibold text-warm-800">{{ rec.title }}</p>
+                <p class="text-warm-500 text-sm">by {{ rec.author }}</p>
+                <p class="text-warm-600 text-sm mt-2">{{ rec.reason }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Next Favorite Author -->
+    {% if ai.recommendations.next_favorite_author %}
+    <div class="mb-10">
+        <h3 class="font-display font-semibold text-xl text-warm-700 mb-4">Your Next Favorite Author</h3>
+        <div class="card accent-left-emerald p-6">
+            <p class="font-display font-bold text-xl text-warm-800">{{ ai.recommendations.next_favorite_author.name }}</p>
+            <p class="text-warm-600 mt-2">{{ ai.recommendations.next_favorite_author.why }}</p>
+            <p class="text-warm-500 text-sm mt-3">Start with: <strong class="text-warm-700">{{ ai.recommendations.next_favorite_author.start_with }}</strong></p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Wildcard -->
+    {% if ai.recommendations.wildcard %}
+    <div class="mb-8">
+        <h3 class="font-display font-semibold text-xl text-warm-700 mb-4">Wildcard Pick</h3>
+        <div class="card accent-left-rose p-6 bg-gradient-to-r from-rose-50/50 to-transparent">
+            <p class="font-display font-bold text-warm-800">{{ ai.recommendations.wildcard.title }}</p>
+            <p class="text-warm-500 text-sm">by {{ ai.recommendations.wildcard.author }}</p>
+            <p class="text-warm-600 text-sm mt-2">{{ ai.recommendations.wildcard.reason }}</p>
+        </div>
+    </div>
+    {% endif %}
+</section>
 {% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => {
-                b.classList.remove('active', 'border-stone-800', 'text-stone-800');
-                b.classList.add('border-transparent', 'text-stone-500');
-            });
-            btn.classList.add('active', 'border-stone-800', 'text-stone-800');
-            btn.classList.remove('border-transparent', 'text-stone-500');
-
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
-            const tabName = btn.dataset.tab;
-            const panelId = tabName === 'flags' ? 'panel-flags' : 'panel-' + tabName;
-            document.getElementById(panelId).classList.remove('hidden');
-        });
-    });
-
     // Render charts
     const statsData = {{ stats_json | safe }};
     if (statsData) renderAllCharts(statsData);
+
+    // Intersection Observer for sticky section nav
+    (function() {
+        const nav = document.getElementById('section-nav');
+        if (!nav) return;
+
+        const navItems = nav.querySelectorAll('.section-nav-item');
+        const sections = [];
+
+        navItems.forEach(item => {
+            const sectionId = item.dataset.section;
+            const section = document.getElementById(sectionId);
+            if (section) sections.push({ id: sectionId, el: section, link: item });
+        });
+
+        if (sections.length === 0) return;
+
+        // Smooth scroll on nav click
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.getElementById(item.dataset.section);
+                if (target) {
+                    const navHeight = nav.offsetHeight + 16;
+                    const top = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Highlight active section
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navItems.forEach(item => item.classList.remove('active'));
+                    const activeItem = nav.querySelector(`[data-section="${entry.target.id}"]`);
+                    if (activeItem) {
+                        activeItem.classList.add('active');
+                        // Scroll nav to show active item on mobile
+                        activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }
+                }
+            });
+        }, {
+            rootMargin: '-20% 0px -60% 0px',
+            threshold: 0,
+        });
+
+        sections.forEach(s => observer.observe(s.el));
+    })();
 </script>
 {% endblock %}

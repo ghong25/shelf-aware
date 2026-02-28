@@ -26,6 +26,7 @@ _DATE_FORMATS = [
     "%Y-%m-%dT%H:%M:%S",
     "%Y-%m-%dT%H:%M:%SZ",
     "%Y-%m-%dT%H:%M:%S%z",
+    "%a, %d %b %Y %H:%M:%S %z",   # RFC 2822 (Goodreads RSS)
     "%b %d, %Y",
     "%B %d, %Y",
     "%d %b %Y",
@@ -34,7 +35,7 @@ _DATE_FORMATS = [
 
 
 def parse_date(date_str):
-    """Try multiple date formats and return a datetime or None."""
+    """Try multiple date formats and return a naive datetime or None."""
     if not date_str or not isinstance(date_str, str):
         return None
     date_str = date_str.strip()
@@ -42,7 +43,9 @@ def parse_date(date_str):
         return None
     for fmt in _DATE_FORMATS:
         try:
-            return datetime.strptime(date_str, fmt)
+            dt = datetime.strptime(date_str, fmt)
+            # Strip timezone info so all comparisons use naive datetimes
+            return dt.replace(tzinfo=None)
         except ValueError:
             continue
     return None

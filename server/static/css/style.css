@@ -1,15 +1,133 @@
-/* Shelf Aware - minimal custom styles (Tailwind handles most) */
+/* Shelf Aware - Warm & Bookish Theme */
 
-.tab-btn {
+/* ===== Global ===== */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Section Navigation (sticky) ===== */
+.section-nav {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(255, 251, 245, 0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #E8E0D4;
+    padding: 0 1rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.section-nav::-webkit-scrollbar {
+    display: none;
+}
+
+.section-nav-inner {
+    display: flex;
+    gap: 0.25rem;
+    max-width: 72rem;
+    margin: 0 auto;
+    min-width: max-content;
+}
+
+.section-nav-item {
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #9C8E7C;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
     cursor: pointer;
-    transition: all 0.15s ease;
+    text-decoration: none;
 }
 
-.tab-btn:hover {
-    background-color: rgb(245 245 244); /* stone-100 */
+.section-nav-item:hover {
+    color: #6B5E50;
 }
 
-/* Heatmap calendar */
+.section-nav-item.active {
+    color: #B45309;
+    border-bottom-color: #B45309;
+}
+
+/* ===== Cards ===== */
+.card {
+    background: #FFFFFF;
+    border-radius: 0.75rem;
+    border: 1px solid #E8E0D4;
+    box-shadow: 0 1px 3px rgba(180, 83, 9, 0.05);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(180, 83, 9, 0.1);
+}
+
+.card-link:hover {
+    transform: translateY(-2px);
+}
+
+/* ===== Section Styles ===== */
+.story-section {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.section-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, #D4C8B8, transparent);
+    margin: 0.5rem 0;
+}
+
+.section-heading {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+    color: #2D2319;
+}
+
+/* ===== Fade-in animation ===== */
+.fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== Metric Cards ===== */
+.metric-card {
+    background: linear-gradient(135deg, #FFFBF5 0%, #FFF7EB 100%);
+    border: 1px solid #E8E0D4;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.metric-card .metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2D2319;
+    line-height: 1.2;
+}
+
+.metric-card .metric-label {
+    font-size: 0.8125rem;
+    color: #9C8E7C;
+    margin-top: 0.25rem;
+}
+
+/* ===== Heatmap calendar (warm palette) ===== */
 .heatmap-cell {
     width: 12px;
     height: 12px;
@@ -17,13 +135,116 @@
     display: inline-block;
 }
 
-.heatmap-level-0 { background-color: #ebedf0; }
-.heatmap-level-1 { background-color: #9be9a8; }
-.heatmap-level-2 { background-color: #40c463; }
-.heatmap-level-3 { background-color: #30a14e; }
-.heatmap-level-4 { background-color: #216e39; }
+.heatmap-level-0 { background-color: #F0E9DF; }
+.heatmap-level-1 { background-color: #FDE68A; }
+.heatmap-level-2 { background-color: #F59E0B; }
+.heatmap-level-3 { background-color: #D97706; }
+.heatmap-level-4 { background-color: #B45309; }
 
-/* Chart containers */
+/* ===== Chart containers ===== */
 canvas {
     max-height: 300px;
+}
+
+/* ===== Hero Identity Card ===== */
+.hero-identity {
+    background: linear-gradient(135deg, #FFFBF5 0%, #FFF7EB 50%, #FFEFD6 100%);
+    border: 1px solid #E8E0D4;
+    border-radius: 1rem;
+    box-shadow: 0 4px 16px rgba(180, 83, 9, 0.08);
+}
+
+/* ===== Accent borders for profile cards ===== */
+.accent-left-amber { border-left: 3px solid #D97706; }
+.accent-left-violet { border-left: 3px solid #7C3AED; }
+.accent-left-rose { border-left: 3px solid #E11D48; }
+.accent-left-emerald { border-left: 3px solid #059669; }
+.accent-left-blue { border-left: 3px solid #2563EB; }
+.accent-left-cyan { border-left: 3px solid #0891B2; }
+
+/* ===== Home profile cards ===== */
+.profile-card {
+    background: #FFFBF5;
+    border: 1px solid #E8E0D4;
+    border-left: 3px solid #D97706;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(180, 83, 9, 0.05);
+    transition: all 0.2s ease;
+}
+
+.profile-card:hover {
+    box-shadow: 0 6px 16px rgba(180, 83, 9, 0.12);
+    transform: translateY(-2px);
+}
+
+/* ===== How-it-works step circles ===== */
+.step-number {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #D97706, #B45309);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+/* ===== Compatibility Score Ring ===== */
+.compat-ring {
+    width: 10rem;
+    height: 10rem;
+    border-radius: 50%;
+    background: conic-gradient(
+        #D97706 calc(var(--score) * 1%),
+        #E8E0D4 calc(var(--score) * 1%)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.compat-ring-inner {
+    width: 8rem;
+    height: 8rem;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+/* ===== Scrollbar styling (webkit) ===== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #F0E9DF;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #D4C8B8;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9C8E7C;
+}
+
+/* ===== Media Queries ===== */
+@media (max-width: 640px) {
+    .section-nav {
+        padding: 0 0.5rem;
+    }
+
+    .section-nav-item {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.75rem;
+    }
 }
