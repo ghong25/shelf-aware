@@ -6,9 +6,9 @@
 <!-- ==================== HEADER ==================== -->
 <div class="mb-8 text-center">
     <h1 class="text-3xl md:text-4xl font-display font-bold">
-        <a href="/u/{{ profile_a.goodreads_id }}" class="text-amber-700 hover:text-amber-800 transition-colors">{{ profile_a.username or profile_a.goodreads_id }}</a>
+        <a href="/u/{{ (profile_a.username or profile_a.goodreads_id)|slugify }}-{{ profile_a.goodreads_id }}" class="text-amber-700 hover:text-amber-800 transition-colors">{{ profile_a.username or profile_a.goodreads_id }}</a>
         <span class="text-warm-300 mx-3 font-body text-lg">vs</span>
-        <a href="/u/{{ profile_b.goodreads_id }}" class="text-cyan-700 hover:text-cyan-800 transition-colors">{{ profile_b.username or profile_b.goodreads_id }}</a>
+        <a href="/u/{{ (profile_b.username or profile_b.goodreads_id)|slugify }}-{{ profile_b.goodreads_id }}" class="text-cyan-700 hover:text-cyan-800 transition-colors">{{ profile_b.username or profile_b.goodreads_id }}</a>
     </h1>
 </div>
 
@@ -419,7 +419,10 @@
                     const activeItem = nav.querySelector(`[data-section="${entry.target.id}"]`);
                     if (activeItem) {
                         activeItem.classList.add('active');
-                        activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        const navRect = nav.getBoundingClientRect();
+                        const itemRect = activeItem.getBoundingClientRect();
+                        const scrollLeft = nav.scrollLeft + itemRect.left - navRect.left - navRect.width / 2 + itemRect.width / 2;
+                        nav.scrollTo({ left: scrollLeft, behavior: 'smooth' });
                     }
                 }
             });

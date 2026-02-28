@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 
 from server.database import close_pool, get_recent_profiles, init_pool
 from server.routers import comparisons, profiles
+from server.routers.profiles import slugify
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -24,6 +25,7 @@ app = FastAPI(title="Shelf Aware", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
+templates.env.filters["slugify"] = slugify
 app.state.templates = templates
 
 app.include_router(profiles.router)

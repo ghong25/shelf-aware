@@ -106,7 +106,12 @@
         {% if stats.get('hater_hype') %}
         <div class="card p-6">
             <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Hater vs Hype <span class="text-sm font-body text-warm-400">({{ stats.hater_hype.label }})</span></h3>
-            <p class="text-warm-400 text-xs mb-4">Your rating vs the crowd's average</p>
+            <p class="text-warm-400 text-xs mb-3">Your rating vs the crowd's average</p>
+            <div class="flex gap-4 text-xs mb-3">
+                <span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full bg-green-700"></span> You rated higher</span>
+                <span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full bg-red-600"></span> You rated lower</span>
+                <span class="flex items-center gap-1 text-warm-400">- - Agree line</span>
+            </div>
             <canvas id="chart-hater" height="200"></canvas>
         </div>
         {% endif %}
@@ -293,8 +298,12 @@
     <div class="bg-gradient-to-br from-orange-50 to-red-50 border border-orange-200 rounded-xl p-8 mb-8">
         <h3 class="font-display font-bold text-2xl text-orange-900 mb-4">Roast My Shelf</h3>
         {% if ai.roast.roast %}
-        <div class="bg-white/70 border border-orange-200 rounded-lg p-5 mb-5">
-            <p class="text-orange-800 text-lg leading-relaxed">{{ ai.roast.roast }}</p>
+        <div class="bg-white/70 border border-orange-200 rounded-lg p-5 mb-5 space-y-3">
+            {% for paragraph in ai.roast.roast.split('\n') %}
+                {% if paragraph.strip() %}
+                <p class="text-orange-800 text-lg leading-relaxed">{{ paragraph.strip() }}</p>
+                {% endif %}
+            {% endfor %}
         </div>
         {% endif %}
         {% if ai.roast.guilty_pleasures %}
@@ -484,8 +493,14 @@
                     const activeItem = nav.querySelector(`[data-section="${entry.target.id}"]`);
                     if (activeItem) {
                         activeItem.classList.add('active');
-                        // Scroll nav to show active item on mobile
-                        activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        // Horizontally scroll the nav bar only (not the page)
+                        const navInner = nav.querySelector('.section-nav-inner');
+                        if (navInner) {
+                            const navRect = nav.getBoundingClientRect();
+                            const itemRect = activeItem.getBoundingClientRect();
+                            const scrollLeft = nav.scrollLeft + itemRect.left - navRect.left - navRect.width / 2 + itemRect.width / 2;
+                            nav.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+                        }
                     }
                 }
             });

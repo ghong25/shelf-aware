@@ -38,24 +38,30 @@ body {
 }
 
 .section-nav-item {
-    padding: 0.75rem 1rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.125rem;
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #9C8E7C;
+    color: #6B5E50;
     white-space: nowrap;
-    border-bottom: 2px solid transparent;
+    border-radius: 9999px;
+    border: 1px solid #E8E0D4;
+    background: transparent;
     transition: all 0.2s ease;
     cursor: pointer;
     text-decoration: none;
 }
 
 .section-nav-item:hover {
-    color: #6B5E50;
+    color: #2D2319;
+    background: #F0E9DF;
+    border-color: #D4C8B8;
 }
 
 .section-nav-item.active {
-    color: #B45309;
-    border-bottom-color: #B45309;
+    color: #FFFBF5;
+    background: #B45309;
+    border-color: #B45309;
 }
 
 /* ===== Cards ===== */
@@ -88,9 +94,10 @@ body {
 }
 
 .section-heading {
-    font-family: "Playfair Display", Georgia, serif;
+    font-family: "DM Sans", system-ui, sans-serif;
     font-weight: 700;
     color: #2D2319;
+    letter-spacing: -0.025em;
 }
 
 /* ===== Fade-in animation ===== */

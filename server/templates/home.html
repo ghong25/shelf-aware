@@ -57,7 +57,7 @@
     <h2 class="text-2xl font-display font-bold mb-8">Recent Analyses</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {% for profile in recent %}
-        <a href="/u/{{ profile.goodreads_id }}"
+        <a href="/u/{{ (profile.username or profile.goodreads_id)|slugify }}-{{ profile.goodreads_id }}"
            class="profile-card block p-5 card-link">
             <h3 class="font-display font-semibold text-lg text-warm-800">{{ profile.username or profile.goodreads_id }}</h3>
             <div class="flex items-center gap-3 mt-2">

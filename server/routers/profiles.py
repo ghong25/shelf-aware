@@ -1,15 +1,44 @@
 import json
+import re
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 from server.database import get_profile
+
+
+def slugify(text: str) -> str:
+    """Convert username to URL-safe slug."""
+    text = text.lower().strip()
+    text = re.sub(r'[^\w\s-]', '', text)
+    text = re.sub(r'[\s_]+', '-', text)
+    return text.strip('-') or 'reader'
+
 
 router = APIRouter()
 
 
+@router.get("/u/{slug}-{goodreads_id}", response_class=HTMLResponse)
+async def profile_page_with_slug(request: Request, slug: str, goodreads_id: str):
+    """Profile page with human-readable slug in URL."""
+    return await _render_profile(request, goodreads_id)
+
+
 @router.get("/u/{goodreads_id}", response_class=HTMLResponse)
 async def profile_page(request: Request, goodreads_id: str):
+    """Bare ID URL — redirect to slugged version if profile exists."""
+    profile = await get_profile(goodreads_id)
+    if profile is None:
+        return request.app.state.templates.TemplateResponse(
+            "home.html",
+            {"request": request, "error": "Profile not found", "recent": []},
+            status_code=404,
+        )
+    slug = slugify(profile.get("username") or goodreads_id)
+    return RedirectResponse(url=f"/u/{slug}-{goodreads_id}", status_code=301)
+
+
+async def _render_profile(request: Request, goodreads_id: str):
     profile = await get_profile(goodreads_id)
     if profile is None:
         return request.app.state.templates.TemplateResponse(
