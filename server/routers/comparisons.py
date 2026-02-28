@@ -55,6 +55,10 @@ async def compare_page(request: Request, comparison_slug: str):
     dynamics = comp_data.get("dynamics", {})
     recs = comp_data.get("recommendations", {})
 
+    # Strip any leading "XX% — " or "XX% - " the AI baked into the line
+    if dynamics.get("compatibility_line"):
+        dynamics["compatibility_line"] = re.sub(r"^\d+%\s*[—-]\s*", "", dynamics["compatibility_line"])
+
     _ai_keys = ["ai_psychological", "ai_vibe_check", "ai_red_green_flags"]
 
     def _parse_ai(profile):

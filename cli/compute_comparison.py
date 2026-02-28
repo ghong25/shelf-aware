@@ -227,6 +227,88 @@ def compute_rating_clash(stats_a, stats_b, user_a, user_b):
     }
 
 
+def compute_compatibility_score(hard_stats):
+    """Weighted compatibility score (0-100) derived from hard stats.
+
+    Weights:
+      35% — Genre taste similarity (cosine similarity of normalized genre vectors)
+      30% — Rating agreement on shared books (agreement rate, penalized by disagreement magnitude)
+      15% — Rating personality match (same label or proximity of mean_diff)
+      10% — Era alignment (cosine similarity of decades vectors)
+      10% — Shared shelf size (diminishing returns, caps at 20 books)
+    """
+
+    # --- Genre taste similarity (35%) ---
+    chart = hard_stats.get("genre_overlap", {}).get("dual_chart_data", {})
+    vals_a = chart.get("values_a", [])
+    vals_b = chart.get("values_b", [])
+    if vals_a and vals_b:
+        sum_a = sum(vals_a) or 1
+        sum_b = sum(vals_b) or 1
+        props_a = [v / sum_a for v in vals_a]
+        props_b = [v / sum_b for v in vals_b]
+        dot = sum(a * b for a, b in zip(props_a, props_b))
+        mag_a = sum(v ** 2 for v in props_a) ** 0.5
+        mag_b = sum(v ** 2 for v in props_b) ** 0.5
+        genre_score = dot / (mag_a * mag_b) if mag_a and mag_b else 0.5
+    else:
+        genre_score = 0.5
+
+    # --- Rating agreement on shared books (30%) ---
+    rift = hard_stats.get("the_rift", {})
+    perfect = rift.get("perfect_agreements", 0)
+    disagreements = rift.get("total_disagreements", 0)
+    rated_shared = perfect + disagreements
+    if rated_shared == 0:
+        agreement_score = 0.5
+    else:
+        agreement_rate = perfect / rated_shared
+        biggest_rifts = rift.get("biggest_rifts", [])
+        if disagreements > 0 and biggest_rifts:
+            avg_diff = sum(b["difference"] for b in biggest_rifts) / len(biggest_rifts)
+            severity_penalty = (avg_diff / 4) * 0.5
+        else:
+            severity_penalty = 0
+        raw_agreement = max(0.0, agreement_rate - severity_penalty)
+        # Confidence weight: blend toward neutral (0.5) when sample is small
+        confidence = min(rated_shared, 10) / 10
+        agreement_score = confidence * raw_agreement + (1 - confidence) * 0.5
+
+    # --- Rating personality match (15%) ---
+    clash = hard_stats.get("rating_clash", {})
+    if clash.get("same_style"):
+        personality_score = 1.0
+    else:
+        diff_a = abs(clash.get("user_a", {}).get("mean_diff", 0))
+        diff_b = abs(clash.get("user_b", {}).get("mean_diff", 0))
+        personality_score = max(0.0, 1.0 - abs(diff_a - diff_b) / 4)
+
+    # --- Era alignment (10%) ---
+    era_chart = hard_stats.get("decades_alignment", {}).get("dual_chart_data", {})
+    era_a = era_chart.get("values_a", [])
+    era_b = era_chart.get("values_b", [])
+    if era_a and era_b:
+        dot = sum(a * b for a, b in zip(era_a, era_b))
+        mag_a = sum(v ** 2 for v in era_a) ** 0.5
+        mag_b = sum(v ** 2 for v in era_b) ** 0.5
+        era_score = dot / (mag_a * mag_b) if mag_a and mag_b else 0.5
+    else:
+        era_score = 0.5
+
+    # --- Shared shelf size (10%) ---
+    shared_count = hard_stats.get("shared_shelf", {}).get("shared_count", 0)
+    shelf_score = min(shared_count, 20) / 20
+
+    weighted = (
+        genre_score    * 0.35 +
+        agreement_score * 0.30 +
+        personality_score * 0.15 +
+        era_score      * 0.10 +
+        shelf_score    * 0.10
+    )
+    return round(weighted * 100)
+
+
 def main():
     raw = sys.stdin.read()
     try:
@@ -252,6 +334,7 @@ def main():
         "decades_alignment": compute_decades_alignment(stats_a, stats_b),
         "rating_clash": compute_rating_clash(stats_a, stats_b, user_a, user_b),
     }
+    result["compatibility_score"] = compute_compatibility_score(result)
 
     json.dump(result, sys.stdout, indent=2)
     sys.stdout.write("\n")
