@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Analytics — Shelf Aware{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+  <h1 class="text-2xl font-display font-bold text-warm-800 dark:text-warm-100">Analytics</h1>
+
+  {# ── Summary cards ── #}
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+    {% set cards = [
+      ("Total Views",       totals.total_views   or 0),
+      ("Last 7 days",       totals.views_7d      or 0),
+      ("Last 30 days",      totals.views_30d     or 0),
+      ("Unique Visitors",   totals.unique_visitors or 0),
+    ] %}
+    {% for label, value in cards %}
+    <div class="bg-white dark:bg-warm-800 rounded-xl p-4 shadow-sm border border-warm-200 dark:border-warm-700 text-center">
+      <div class="text-3xl font-display font-bold text-warm-800 dark:text-warm-100">{{ value }}</div>
+      <div class="text-xs text-warm-400 mt-1 font-body">{{ label }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {# ── By page type ── #}
+  {% if by_type %}
+  <div class="bg-white dark:bg-warm-800 rounded-xl p-5 shadow-sm border border-warm-200 dark:border-warm-700">
+    <h2 class="text-sm font-semibold text-warm-500 dark:text-warm-400 uppercase tracking-wider mb-3">By Page Type</h2>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-warm-400 border-b border-warm-100 dark:border-warm-700">
+          <th class="pb-2 font-medium">Page</th>
+          <th class="pb-2 font-medium text-right">All Time</th>
+          <th class="pb-2 font-medium text-right">30d</th>
+          <th class="pb-2 font-medium text-right">7d</th>
+          <th class="pb-2 font-medium text-right">Unique</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-warm-100 dark:divide-warm-700">
+        {% for row in by_type %}
+        <tr>
+          <td class="py-2 capitalize font-medium text-warm-700 dark:text-warm-200">{{ row.page_type }}</td>
+          <td class="py-2 text-right text-warm-600 dark:text-warm-300">{{ row.total }}</td>
+          <td class="py-2 text-right text-warm-600 dark:text-warm-300">{{ row.last_30d }}</td>
+          <td class="py-2 text-right text-warm-600 dark:text-warm-300">{{ row.last_7d }}</td>
+          <td class="py-2 text-right text-warm-600 dark:text-warm-300">{{ row.unique_visitors }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {# ── Daily chart ── #}
+  {% if daily %}
+  <div class="bg-white dark:bg-warm-800 rounded-xl p-5 shadow-sm border border-warm-200 dark:border-warm-700">
+    <h2 class="text-sm font-semibold text-warm-500 dark:text-warm-400 uppercase tracking-wider mb-4">Daily Views (last 30 days)</h2>
+    <canvas id="dailyChart" height="80"></canvas>
+  </div>
+  {% endif %}
+
+  {# ── Top profiles ── #}
+  {% if top_profiles %}
+  <div class="bg-white dark:bg-warm-800 rounded-xl p-5 shadow-sm border border-warm-200 dark:border-warm-700">
+    <h2 class="text-sm font-semibold text-warm-500 dark:text-warm-400 uppercase tracking-wider mb-3">Top Profiles</h2>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-warm-400 border-b border-warm-100 dark:border-warm-700">
+          <th class="pb-2 font-medium">User</th>
+          <th class="pb-2 font-medium">ID</th>
+          <th class="pb-2 font-medium text-right">Views</th>
+          <th class="pb-2 font-medium text-right">Unique</th>
+          <th class="pb-2 font-medium text-right hidden sm:table-cell">Last Seen</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-warm-100 dark:divide-warm-700">
+        {% for row in top_profiles %}
+        <tr>
+          <td class="py-2">
+            <a href="/u/{{ row.entity_id }}" class="font-medium text-amber-700 dark:text-amber-400 hover:underline">
+              {{ row.username or "—" }}
+            </a>
+          </td>
+          <td class="py-2 text-warm-400 font-mono text-xs">{{ row.entity_id }}</td>
+          <td class="py-2 text-right text-warm-600 dark:text-warm-300">{{ row.views }}</td>
+          <td class="py-2 text-right text-warm-600 dark:text-warm-300">{{ row.unique_views }}</td>
+          <td class="py-2 text-right text-warm-400 text-xs hidden sm:table-cell">
+            {{ row.last_viewed.strftime("%b %d") if row.last_viewed else "—" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {# ── Top comparisons ── #}
+  {% if top_comparisons %}
+  <div class="bg-white dark:bg-warm-800 rounded-xl p-5 shadow-sm border border-warm-200 dark:border-warm-700">
+    <h2 class="text-sm font-semibold text-warm-500 dark:text-warm-400 uppercase tracking-wider mb-3">Top Comparisons</h2>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-warm-400 border-b border-warm-100 dark:border-warm-700">
+          <th class="pb-2 font-medium">Pair</th>
+          <th class="pb-2 font-medium text-right">Views</th>
+          <th class="pb-2 font-medium text-right hidden sm:table-cell">Last Seen</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-warm-100 dark:divide-warm-700">
+        {% for row in top_comparisons %}
+        {% set ids = row.entity_id.split('-vs-') %}
+        <tr>
+          <td class="py-2">
+            <a href="/compare/{{ row.entity_id }}" class="font-medium text-amber-700 dark:text-amber-400 hover:underline">
+              {{ row.username_a or ids[0] }} vs {{ row.username_b or ids[1] }}
+            </a>
+          </td>
+          <td class="py-2 text-right text-warm-600 dark:text-warm-300">{{ row.views }}</td>
+          <td class="py-2 text-right text-warm-400 text-xs hidden sm:table-cell">
+            {{ row.last_viewed.strftime("%b %d") if row.last_viewed else "—" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  {# ── Pending requests ── #}
+  <div class="bg-white dark:bg-warm-800 rounded-xl p-5 shadow-sm border border-warm-200 dark:border-warm-700">
+    <h2 class="text-sm font-semibold text-warm-500 dark:text-warm-400 uppercase tracking-wider mb-3">
+      Pending Requests
+      {% if pending_requests %}
+      <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300">{{ pending_requests | length }}</span>
+      {% endif %}
+    </h2>
+    {% if pending_requests %}
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-warm-400 border-b border-warm-100 dark:border-warm-700">
+          <th class="pb-2 font-medium">Type</th>
+          <th class="pb-2 font-medium">Name</th>
+          <th class="pb-2 font-medium">URL(s)</th>
+          <th class="pb-2 font-medium text-right hidden sm:table-cell">Submitted</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-warm-100 dark:divide-warm-700">
+        {% for req in pending_requests %}
+        <tr>
+          <td class="py-2 capitalize">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+              {% if req.request_type == 'comparison' %}bg-cyan-100 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-300
+              {% else %}bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300{% endif %}">
+              {{ req.request_type }}
+            </span>
+          </td>
+          <td class="py-2 text-warm-600 dark:text-warm-300">{{ req.requester_name or "—" }}</td>
+          <td class="py-2 text-warm-500 dark:text-warm-400 text-xs font-mono max-w-xs truncate">
+            {{ req.goodreads_url_1 }}
+            {% if req.goodreads_url_2 %}
+            <br>{{ req.goodreads_url_2 }}
+            {% endif %}
+          </td>
+          <td class="py-2 text-right text-warm-400 text-xs hidden sm:table-cell">
+            {{ req.created_at.strftime("%b %d, %H:%M") if req.created_at else "—" }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-warm-400 text-sm py-4">No pending requests.</p>
+    {% endif %}
+  </div>
+
+  {% if not by_type %}
+  <p class="text-warm-400 text-center py-12">No data yet — start visiting some pages!</p>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if daily %}
+<script>
+(function() {
+  const daily = {{ daily | tojson }};
+  const isDark = document.documentElement.classList.contains('dark');
+  const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const labelColor = isDark ? '#a89f93' : '#6b5e50';
+
+  const ctx = document.getElementById('dailyChart').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: daily.map(d => d.day),
+      datasets: [{
+        data: daily.map(d => d.views),
+        backgroundColor: isDark ? 'rgba(217, 119, 6, 0.5)' : 'rgba(180, 83, 9, 0.3)',
+        borderColor: isDark ? 'rgb(217, 119, 6)' : 'rgb(180, 83, 9)',
+        borderWidth: 1,
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: labelColor, maxTicksLimit: 10 } },
+        y: { grid: { color: gridColor }, ticks: { color: labelColor, precision: 0 }, beginAtZero: true }
+      }
+    }
+  });
+
+  window.addEventListener('darkModeToggle', (e) => {
+    const dark = e.detail.dark;
+    chart.data.datasets[0].backgroundColor = dark ? 'rgba(217,119,6,0.5)' : 'rgba(180,83,9,0.3)';
+    chart.data.datasets[0].borderColor = dark ? 'rgb(217,119,6)' : 'rgb(180,83,9)';
+    chart.options.scales.x.grid.color = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    chart.options.scales.y.grid.color = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    chart.options.scales.x.ticks.color = dark ? '#a89f93' : '#6b5e50';
+    chart.options.scales.y.ticks.color = dark ? '#a89f93' : '#6b5e50';
+    chart.update();
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

@@ -1,4 +1,6 @@
+import asyncio
 import asyncpg
+import hashlib
 import json
 import os
 
@@ -112,6 +114,114 @@ async def get_benchmark_stats(goodreads_id: str) -> dict | None:
         "median_bpy": round(float(d["median_bpy"]), 1) if d["median_bpy"] is not None else None,
         "total_profiles": int(d["total_profiles"]),
     }
+
+
+async def log_page_view(page_type: str, entity_id: str | None, ip: str | None, referrer: str | None) -> None:
+    try:
+        ip_hash = hashlib.sha256((ip or "").encode()).hexdigest()[:16] if ip else None
+        await get_pool().execute(
+            "INSERT INTO page_views (page_type, entity_id, ip_hash, referrer) VALUES ($1, $2, $3, $4)",
+            page_type, entity_id, ip_hash, referrer,
+        )
+    except Exception:
+        pass
+
+
+async def get_analytics() -> dict:
+    pool = get_pool()
+
+    totals, by_type, top_profiles, top_comparisons, daily = await asyncio.gather(
+        pool.fetchrow("""
+            SELECT
+                COUNT(*)                                                              AS total_views,
+                COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '7 days')       AS views_7d,
+                COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '30 days')      AS views_30d,
+                COUNT(DISTINCT ip_hash)                                               AS unique_visitors
+            FROM page_views
+        """),
+        pool.fetch("""
+            SELECT
+                page_type,
+                COUNT(*)                                                              AS total,
+                COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '7 days')       AS last_7d,
+                COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '30 days')      AS last_30d,
+                COUNT(DISTINCT ip_hash)                                               AS unique_visitors
+            FROM page_views
+            GROUP BY page_type ORDER BY total DESC
+        """),
+        pool.fetch("""
+            SELECT
+                pv.entity_id,
+                p.username,
+                COUNT(*)                    AS views,
+                COUNT(DISTINCT pv.ip_hash)  AS unique_views,
+                MAX(pv.created_at)          AS last_viewed
+            FROM page_views pv
+            LEFT JOIN profiles p ON p.goodreads_id = pv.entity_id
+            WHERE pv.page_type = 'profile'
+            GROUP BY pv.entity_id, p.username
+            ORDER BY views DESC LIMIT 15
+        """),
+        pool.fetch("""
+            SELECT
+                pv.entity_id,
+                pa.username AS username_a,
+                pb.username AS username_b,
+                COUNT(*)           AS views,
+                MAX(pv.created_at) AS last_viewed
+            FROM page_views pv
+            LEFT JOIN profiles pa ON pa.goodreads_id = SPLIT_PART(pv.entity_id, '-vs-', 1)
+            LEFT JOIN profiles pb ON pb.goodreads_id = SPLIT_PART(pv.entity_id, '-vs-', 2)
+            WHERE pv.page_type = 'compare'
+            GROUP BY pv.entity_id, pa.username, pb.username
+            ORDER BY views DESC LIMIT 10
+        """),
+        pool.fetch("""
+            SELECT DATE(created_at AT TIME ZONE 'UTC') AS day, COUNT(*) AS views
+            FROM page_views
+            WHERE created_at > NOW() - INTERVAL '30 days'
+            GROUP BY day ORDER BY day
+        """),
+    )
+
+    return {
+        "totals": dict(totals) if totals else {},
+        "by_type": [dict(r) for r in by_type],
+        "top_profiles": [dict(r) for r in top_profiles],
+        "top_comparisons": [dict(r) for r in top_comparisons],
+        "daily": [{"day": str(r["day"]), "views": r["views"]} for r in daily],
+    }
+
+
+async def ensure_requests_table():
+    await get_pool().execute("""
+        CREATE TABLE IF NOT EXISTS analysis_requests (
+            id SERIAL PRIMARY KEY,
+            request_type VARCHAR(20) NOT NULL,
+            requester_name VARCHAR(255),
+            goodreads_url_1 VARCHAR(500) NOT NULL,
+            goodreads_url_2 VARCHAR(500),
+            status VARCHAR(20) DEFAULT 'pending',
+            created_at TIMESTAMPTZ DEFAULT NOW()
+        )
+    """)
+
+
+async def store_request(request_type: str, requester_name: str,
+                        url1: str, url2: str | None = None) -> None:
+    await get_pool().execute(
+        """INSERT INTO analysis_requests
+           (request_type, requester_name, goodreads_url_1, goodreads_url_2)
+           VALUES ($1, $2, $3, $4)""",
+        request_type, requester_name, url1, url2,
+    )
+
+
+async def get_pending_requests() -> list[dict]:
+    rows = await get_pool().fetch(
+        "SELECT * FROM analysis_requests WHERE status = 'pending' ORDER BY created_at DESC"
+    )
+    return [dict(r) for r in rows]
 
 
 async def get_comparison(id1: str, id2: str) -> dict | None:

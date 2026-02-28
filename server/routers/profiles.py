@@ -5,7 +5,7 @@ import re
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
-from server.database import get_benchmark_stats, get_profile
+from server.database import get_benchmark_stats, get_profile, log_page_view
 
 
 def slugify(text: str) -> str:
@@ -39,6 +39,13 @@ async def profile_page(request: Request, goodreads_id: str):
     return RedirectResponse(url=f"/u/{slug}-{goodreads_id}", status_code=301)
 
 
+def _get_client_ip(request: Request) -> str | None:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else None
+
+
 async def _render_profile(request: Request, goodreads_id: str):
     profile, benchmarks = await asyncio.gather(
         get_profile(goodreads_id),
@@ -68,6 +75,12 @@ async def _render_profile(request: Request, goodreads_id: str):
         val = profile.get(key)
         if val is not None:
             ai_sections[key.removeprefix("ai_")] = val if isinstance(val, dict) else json.loads(val)
+
+    asyncio.create_task(log_page_view(
+        "profile", goodreads_id,
+        _get_client_ip(request),
+        request.headers.get("Referer"),
+    ))
 
     return request.app.state.templates.TemplateResponse(
         "profile.html",

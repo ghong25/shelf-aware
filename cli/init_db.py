@@ -41,6 +41,18 @@ CREATE TABLE IF NOT EXISTS comparisons (
     created_at      TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(profile_a_id, profile_b_id)
 );
+
+CREATE TABLE IF NOT EXISTS page_views (
+    id          SERIAL PRIMARY KEY,
+    page_type   VARCHAR(20) NOT NULL,
+    entity_id   VARCHAR(128),
+    ip_hash     VARCHAR(16),
+    referrer    TEXT,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS page_views_created_at_idx ON page_views(created_at DESC);
+CREATE INDEX IF NOT EXISTS page_views_entity_id_idx  ON page_views(entity_id);
 """
 
 

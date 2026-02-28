@@ -1,11 +1,12 @@
+import asyncio
 import json
 import re
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
-from server.database import get_comparison, get_profile
-from server.routers.profiles import slugify
+from server.database import get_comparison, get_profile, log_page_view
+from server.routers.profiles import _get_client_ip, slugify
 
 router = APIRouter()
 
@@ -71,6 +72,13 @@ async def compare_page(request: Request, comparison_slug: str):
 
     ai_a = _parse_ai(profile_a)
     ai_b = _parse_ai(profile_b)
+
+    entity_id = f"{min(id1, id2)}-vs-{max(id1, id2)}"
+    asyncio.create_task(log_page_view(
+        "compare", entity_id,
+        _get_client_ip(request),
+        request.headers.get("Referer"),
+    ))
 
     return request.app.state.templates.TemplateResponse(
         "compare.html",

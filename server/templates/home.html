@@ -9,22 +9,89 @@
         <h1 class="text-5xl md:text-7xl font-serif font-bold text-warm-800 dark:text-warm-100 mb-4">Shelf Aware</h1>
         <p class="text-xl md:text-2xl text-warm-500 dark:text-warm-400 font-display italic mb-3">What your bookshelf says about you</p>
         <p class="text-warm-400 dark:text-warm-400 max-w-xl mx-auto mb-10">
-            Drop in your Goodreads profile and let AI psychoanalyze your reading habits.
-            Get your personality profile, a merciless roast, and recommendations you'll actually read.
+            Submit your Goodreads profile to request an analysis. We'll dig through your reading history and send you a link to your results.
         </p>
 
-        <!-- URL Input Card -->
-        <div class="card p-8 max-w-xl mx-auto">
-            <p class="text-warm-500 dark:text-warm-400 mb-4 text-sm font-medium uppercase tracking-wide">Enter your Goodreads profile URL</p>
-            <div class="bg-warm-800 dark:bg-warm-900 rounded-lg px-5 py-4 text-left">
-                <code class="text-amber-400 text-sm font-mono">https://goodreads.com/user/show/<span class="text-warm-300">YOUR_ID</span></code>
+        <!-- Request Forms Card -->
+        <div class="card p-8 max-w-xl mx-auto text-left">
+            <!-- Tabs -->
+            <div class="flex border-b border-warm-200 dark:border-warm-700 mb-6">
+                <button id="tab-profile"
+                    onclick="switchTab('profile')"
+                    class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-amber-600 text-amber-700 dark:text-amber-400 -mb-px">
+                    Request Analysis
+                </button>
+                <button id="tab-comparison"
+                    onclick="switchTab('comparison')"
+                    class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-warm-400 hover:text-warm-600 dark:hover:text-warm-200 -mb-px">
+                    Request Comparison
+                </button>
+            </div>
+
+            <!-- Profile tab -->
+            <div id="panel-profile">
+                <form method="POST" action="/request/profile" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Your name (optional)</label>
+                        <input type="text" name="name" placeholder="e.g. Jane"
+                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Goodreads profile URL <span class="text-red-400">*</span></label>
+                        <input type="url" name="goodreads_url" required
+                            placeholder="https://www.goodreads.com/user/show/12345"
+                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-4 py-2 text-sm transition-colors">
+                        Request Analysis
+                    </button>
+                </form>
+            </div>
+
+            <!-- Comparison tab -->
+            <div id="panel-comparison" class="hidden">
+                <form method="POST" action="/request/comparison" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Your name (optional)</label>
+                        <input type="text" name="name" placeholder="e.g. Jane"
+                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Your Goodreads URL <span class="text-red-400">*</span></label>
+                        <input type="url" name="goodreads_url_1" required
+                            placeholder="https://www.goodreads.com/user/show/12345"
+                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Friend's Goodreads URL <span class="text-red-400">*</span></label>
+                        <input type="url" name="goodreads_url_2" required
+                            placeholder="https://www.goodreads.com/user/show/67890"
+                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-4 py-2 text-sm transition-colors">
+                        Request Comparison
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Flash banners -->
+{% if success == 'profile' %}
+<div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-4 mb-8 max-w-xl mx-auto text-center">
+    Request received! We'll run your analysis and get back to you soon.
+</div>
+{% elif success == 'comparison' %}
+<div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-4 mb-8 max-w-xl mx-auto text-center">
+    Comparison request received! We'll run the analysis and get back to you soon.
+</div>
+{% endif %}
+
 {% if error %}
-<div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg p-4 mb-8 max-w-xl mx-auto">
+<div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg p-4 mb-8 max-w-xl mx-auto text-center">
     {{ error }}
 </div>
 {% endif %}
@@ -36,21 +103,39 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
         <div class="text-center">
             <div class="step-number mx-auto mb-4">1</div>
-            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">Share Your Profile</h3>
-            <p class="text-warm-400 text-sm">Paste your Goodreads profile URL and we'll pull your reading history</p>
+            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">Submit Your URL</h3>
+            <p class="text-warm-400 text-sm">Enter your Goodreads profile URL in the form above</p>
         </div>
         <div class="text-center">
             <div class="step-number mx-auto mb-4">2</div>
-            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">AI Analysis</h3>
-            <p class="text-warm-400 text-sm">Our AI digs through your books to build a psychological profile of your reading habits</p>
+            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">We Run the Analysis</h3>
+            <p class="text-warm-400 text-sm">We dig through your reading history and build your profile — usually within a day</p>
         </div>
         <div class="text-center">
             <div class="step-number mx-auto mb-4">3</div>
             <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">Get Your Results</h3>
-            <p class="text-warm-400 text-sm">Personality profile, roast, vibe check, flags, and book recommendations</p>
+            <p class="text-warm-400 text-sm">You'll get a shareable link to your personality profile, roast, and book recommendations</p>
         </div>
     </div>
 </section>
+
+<script>
+function switchTab(tab) {
+    ['profile', 'comparison'].forEach(function(t) {
+        var btn = document.getElementById('tab-' + t);
+        var panel = document.getElementById('panel-' + t);
+        if (t === tab) {
+            btn.classList.add('border-amber-600', 'text-amber-700', 'dark:text-amber-400');
+            btn.classList.remove('border-transparent', 'text-warm-400');
+            panel.classList.remove('hidden');
+        } else {
+            btn.classList.remove('border-amber-600', 'text-amber-700', 'dark:text-amber-400');
+            btn.classList.add('border-transparent', 'text-warm-400');
+            panel.classList.add('hidden');
+        }
+    });
+}
+</script>
 
 <!-- Recent Analyses -->
 {% if recent %}
