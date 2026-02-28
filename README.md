@@ -145,7 +145,7 @@ Both comparison agents receive both readers' full book lists and run simultaneou
 > {
 >   "bridge_books": [
 >     {"title": "book title", "author": "author name", "why": "why this book perfectly intersects BOTH of their distinct tastes — reference specific books/genres from each person's shelf"}
->   ] // exactly 3 books that NEITHER person has read
+>   ] // exactly 5 books that NEITHER person has read
 >   "the_compromise": {
 >     "for_a": {
 >       "title": "exactly one book from B's 5-star shelf (or 4-star if no 5-stars)",
