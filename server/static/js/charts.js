@@ -368,6 +368,60 @@ function renderDualRadar(canvasId, chartData, labelA, labelB) {
     });
 }
 
+function renderGenreHBar(canvasId, chartData, labelA, labelB) {
+    const el = document.getElementById(canvasId);
+    if (!el || !chartData) return;
+    const c = getChartColors();
+    new Chart(el, {
+        type: 'bar',
+        data: {
+            labels: chartData.labels,
+            datasets: [
+                {
+                    label: labelA || 'Reader A',
+                    data: chartData.values_a,
+                    backgroundColor: c.accent + 'cc',
+                    borderColor: c.accent,
+                    borderWidth: 1,
+                    borderRadius: 4,
+                },
+                {
+                    label: labelB || 'Reader B',
+                    data: chartData.values_b,
+                    backgroundColor: c.palette[1] + 'cc',
+                    borderColor: c.palette[1],
+                    borderWidth: 1,
+                    borderRadius: 4,
+                },
+            ],
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                tooltip: {
+                    backgroundColor: c.tooltipBg,
+                    titleColor: c.tooltipText,
+                    bodyColor: c.tooltipText,
+                },
+            },
+            scales: {
+                x: {
+                    grid: { color: c.grid },
+                    ticks: { color: c.secondary },
+                    beginAtZero: true,
+                },
+                y: {
+                    grid: { color: c.grid },
+                    ticks: { color: c.secondary, font: { size: 11 } },
+                },
+            },
+        },
+    });
+}
+
 function renderDualBar(canvasId, chartData, labelA, labelB) {
     const el = document.getElementById(canvasId);
     if (!el || !chartData) return;
@@ -656,7 +710,7 @@ window.addEventListener('darkModeToggle', () => {
         if (compData.genre_overlap && compData.genre_overlap.dual_chart_data) {
             const labelA = document.querySelector('[class*="text-amber-700"]')?.textContent;
             const labelB = document.querySelector('[class*="text-cyan-700"]')?.textContent;
-            renderDualRadar('chart-genre-dual', compData.genre_overlap.dual_chart_data, labelA, labelB);
+            renderGenreHBar('chart-genre-dual', compData.genre_overlap.dual_chart_data, labelA, labelB);
         }
         if (compData.decades_alignment && compData.decades_alignment.dual_chart_data) {
             const labelA = document.querySelector('[class*="text-amber-700"]')?.textContent;

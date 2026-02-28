@@ -1,15 +1,41 @@
 import json
+import re
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from server.database import get_comparison, get_profile
+from server.routers.profiles import slugify
 
 router = APIRouter()
 
 
-@router.get("/compare/{id1}-vs-{id2}", response_class=HTMLResponse)
-async def compare_page(request: Request, id1: str, id2: str):
+@router.get("/compare/{comparison_slug}", response_class=HTMLResponse)
+async def compare_page(request: Request, comparison_slug: str):
+    # Try new slugged format: name-id1-vs-name-id2
+    m = re.match(r'^(.*)-(\d+)-vs-(.*)-(\d+)$', comparison_slug)
+    if m:
+        _, id1, _, id2 = m.groups()
+    else:
+        # Try legacy format: id1-vs-id2 and redirect to slugged URL
+        m_old = re.match(r'^(\d+)-vs-(\d+)$', comparison_slug)
+        if m_old:
+            id1, id2 = m_old.groups()
+            profile_a = await get_profile(id1)
+            profile_b = await get_profile(id2)
+            if profile_a and profile_b:
+                slug_a = slugify(profile_a.get("username") or id1)
+                slug_b = slugify(profile_b.get("username") or id2)
+                return RedirectResponse(
+                    url=f"/compare/{slug_a}-{id1}-vs-{slug_b}-{id2}",
+                    status_code=301,
+                )
+        return request.app.state.templates.TemplateResponse(
+            "home.html",
+            {"request": request, "error": "Comparison not found", "recent": []},
+            status_code=404,
+        )
+
     comparison = await get_comparison(id1, id2)
     profile_a = await get_profile(id1)
     profile_b = await get_profile(id2)
