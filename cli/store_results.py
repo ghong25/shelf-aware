@@ -4,6 +4,7 @@
 import argparse
 import json
 import os
+import re
 import sys
 
 import psycopg2
@@ -28,7 +29,8 @@ INSERT INTO profiles (
     ai_red_green_flags,
     ai_blind_spots,
     ai_reading_evolution,
-    ai_recommendations
+    ai_recommendations,
+    ai_deep_profile
 ) VALUES (
     %(goodreads_id)s,
     %(username)s,
@@ -42,7 +44,8 @@ INSERT INTO profiles (
     %(ai_red_green_flags)s,
     %(ai_blind_spots)s,
     %(ai_reading_evolution)s,
-    %(ai_recommendations)s
+    %(ai_recommendations)s,
+    %(ai_deep_profile)s
 )
 ON CONFLICT (goodreads_id) DO UPDATE SET
     username            = EXCLUDED.username,
@@ -57,6 +60,7 @@ ON CONFLICT (goodreads_id) DO UPDATE SET
     ai_blind_spots      = EXCLUDED.ai_blind_spots,
     ai_reading_evolution = EXCLUDED.ai_reading_evolution,
     ai_recommendations  = EXCLUDED.ai_recommendations,
+    ai_deep_profile     = EXCLUDED.ai_deep_profile,
     updated_at          = NOW();
 """
 
@@ -103,6 +107,7 @@ def store_profile(data: dict) -> None:
         "ai_blind_spots":     ai.get("blind_spots"),
         "ai_reading_evolution": ai.get("reading_evolution"),
         "ai_recommendations": ai.get("recommendations"),
+        "ai_deep_profile":    ai.get("deep_profile"),
     }
 
     print(f"Upserting profile for Goodreads user {user_id}...", file=sys.stderr)
@@ -118,7 +123,10 @@ def store_profile(data: dict) -> None:
         sys.exit(1)
 
     print("Profile stored successfully.", file=sys.stderr)
-    print(f"shelf-aware.onrender.com/u/{user_id}")
+    username = data.get("user_name") or user_id
+    slug = re.sub(r'[^\w\s-]', '', username.lower().strip())
+    slug = re.sub(r'[\s_]+', '-', slug).strip('-') or 'reader'
+    print(f"shelf-aware.onrender.com/u/{slug}-{user_id}")
 
 
 def store_comparison(data: dict) -> None:

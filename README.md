@@ -35,11 +35,11 @@ A second Python script crunches 8 statistical analyses from the book data:
 
 All stats include chart-ready data that renders client-side via Chart.js.
 
-### 3. AI Analysis (7 Parallel Agents)
+### 3. AI Analysis (8 Parallel Agents)
 
-Claude Code launches 7 independent agents simultaneously, each analyzing the book list from a different angle. Each agent runs in its own isolated context — they can't see each other's work or pollute each other's outputs. Opus handles the analyses that require deeper pattern recognition; Sonnet handles the more structured ones.
+Claude Code launches 8 independent agents simultaneously, each analyzing the book list from a different angle. Each agent runs in its own isolated context — they can't see each other's work or pollute each other's outputs. Opus handles the analyses that require deeper pattern recognition; Sonnet handles the more structured ones.
 
-Every agent receives the full book list as JSON and returns structured JSON.
+Every agent receives the full book list as CSV and returns structured JSON. Agent 8 also reads the reader's own review text for deeper profiling.
 
 #### Psychological Profile (Opus)
 
@@ -68,6 +68,10 @@ Every agent receives the full book list as JSON and returns structured JSON.
 #### Book Recommendations (Opus)
 
 > You are an expert book recommender. Analyze this reader's complete bookshelf to understand their taste deeply — genres they love, authors they return to, themes that resonate, ratings patterns, and how their taste has evolved. Here are their books: `<books_json>`. Recommend books they have NOT already read. Be specific and thoughtful — no obvious picks they've surely already heard of. Return JSON: `{"top_10": [{"title": "book title", "author": "author name", "reason": "1-2 sentence personalized reason why this reader specifically would love this book"}], "deep_cuts": [{"title": "book title", "author": "author name", "reason": "why this lesser-known book matches their taste"}]` (3-5 obscure/underrated picks), `"next_favorite_author": {"name": "author name", "why": "why this author is perfect for them", "start_with": "specific book to start with"}, "wildcard": {"title": "book title", "author": "author name", "reason": "a surprising pick outside their comfort zone that they'd still love, and why"}}`
+
+#### Between the Lines — Deep Profile (Opus)
+
+> You are a literary detective conducting a deep biographical and psychological profile of a person based solely on their reading history and reviews. Read the book list from `books.csv` and their reviews from `reviews.txt` — the reader's own words about books they've read. Working from titles, authors, ratings, dates read, publication years, reading patterns, AND review text — construct a detailed profile. Think like a detective: what do their choices AND their words reveal about their age, gender, education, career, beliefs, personality, and inner life? For each section, separate observations into **Strong Inferences** (confident claims backed by clear patterns, citing specific titles and quoting reviews) and **Speculative** (plausible guesses from weaker signals). Sections: The Basics, Education & Intellectual Life, Career & Life Stage, Reading Tastes: What They Love, Reading Tastes: What They Avoid, Intellectual & Ideological Profile, Personality & Inner Life. End with a `summary_portrait`. Return JSON: `{"sections": [{"title": "...", "strong_inferences": ["..."], "speculative": ["..."]}], "summary_portrait": "2-4 sentence vivid portrait"}`
 
 ### 4. Storage & Serving
 
@@ -187,7 +191,7 @@ DATABASE_URL=<render-postgres-url> uv run cli/init_db.py
     │
     ├─ cli/fetch_goodreads.py      Fetches RSS + enriches via OpenLibrary
     ├─ cli/compute_stats.py        Computes 8 statistical analyses
-    ├─ 7 parallel Claude agents    AI personality analyses + recommendations
+    ├─ 8 parallel Claude agents    AI personality analyses + deep profile + recommendations
     ├─ cli/store_results.py        Upserts everything into Postgres
     │
     └─ Result: shelf-aware.onrender.com/u/<id>

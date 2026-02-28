@@ -40,7 +40,7 @@ _load_dotenv()
 # ---------------------------------------------------------------------------
 
 # Slim CSV columns — the minimal set AI agents need for analysis
-SLIM_COLUMNS = ["title", "author", "user_rating", "average_rating", "date_read", "year_published"]
+SLIM_COLUMNS = ["title", "author", "user_rating", "average_rating", "date_read", "year_published", "user_review"]
 
 
 def extract_user_id(url_or_id: str) -> str:
@@ -70,6 +70,11 @@ def extract_user_id(url_or_id: str) -> str:
         return match.group(1)
 
     raise ValueError(f"Could not extract a Goodreads user ID from: {url_or_id!r}")
+
+
+def _strip_html(text: str) -> str:
+    """Remove HTML tags from text."""
+    return re.sub(r"<[^>]+>", "", text).strip()
 
 
 def _text(item: ET.Element, tag: str) -> str:
@@ -173,6 +178,7 @@ def fetch_rss_page(
         date_read = _text(item, "user_read_at")
         date_added = _text(item, "user_date_added")
         shelves = _text(item, "user_shelves")
+        user_review = _strip_html(_text(item, "user_review"))
         year_published = _int_or_none(_text(item, "book_published"))
 
         # Cover URL: prefer large image, fall back to regular
@@ -191,6 +197,7 @@ def fetch_rss_page(
                 "date_read": date_read,
                 "date_added": date_added,
                 "shelves": shelves,
+                "user_review": user_review,
                 "year_published": year_published,
                 "cover_url": cover_url,
             }

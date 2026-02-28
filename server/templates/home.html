@@ -4,25 +4,27 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="text-center py-16 md:py-24">
-    <h1 class="text-5xl md:text-7xl font-display font-bold text-warm-800 mb-4">Shelf Aware</h1>
-    <p class="text-xl md:text-2xl text-warm-500 font-display italic mb-3">What your bookshelf says about you</p>
-    <p class="text-warm-400 max-w-xl mx-auto mb-10">
-        Drop in your Goodreads profile and let AI psychoanalyze your reading habits.
-        Get your personality profile, a merciless roast, and recommendations you'll actually read.
-    </p>
+<div class="text-center py-16 md:py-24 hero-home relative overflow-hidden">
+    <div class="relative z-10">
+        <h1 class="text-5xl md:text-7xl font-serif font-bold text-warm-800 dark:text-warm-100 mb-4">Shelf Aware</h1>
+        <p class="text-xl md:text-2xl text-warm-500 dark:text-warm-400 font-display italic mb-3">What your bookshelf says about you</p>
+        <p class="text-warm-400 dark:text-warm-400 max-w-xl mx-auto mb-10">
+            Drop in your Goodreads profile and let AI psychoanalyze your reading habits.
+            Get your personality profile, a merciless roast, and recommendations you'll actually read.
+        </p>
 
-    <!-- URL Input Card -->
-    <div class="card p-8 max-w-xl mx-auto">
-        <p class="text-warm-500 mb-4 text-sm font-medium uppercase tracking-wide">Enter your Goodreads profile URL</p>
-        <div class="bg-warm-800 rounded-lg px-5 py-4 text-left">
-            <code class="text-amber-400 text-sm font-mono">https://goodreads.com/user/show/<span class="text-warm-300">YOUR_ID</span></code>
+        <!-- URL Input Card -->
+        <div class="card p-8 max-w-xl mx-auto">
+            <p class="text-warm-500 dark:text-warm-400 mb-4 text-sm font-medium uppercase tracking-wide">Enter your Goodreads profile URL</p>
+            <div class="bg-warm-800 dark:bg-warm-900 rounded-lg px-5 py-4 text-left">
+                <code class="text-amber-400 text-sm font-mono">https://goodreads.com/user/show/<span class="text-warm-300">YOUR_ID</span></code>
+            </div>
         </div>
     </div>
 </div>
 
 {% if error %}
-<div class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-8 max-w-xl mx-auto">
+<div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg p-4 mb-8 max-w-xl mx-auto">
     {{ error }}
 </div>
 {% endif %}
@@ -30,21 +32,21 @@
 <!-- How It Works -->
 <section class="mb-16">
     <div class="section-divider mb-10"></div>
-    <h2 class="text-2xl font-display font-bold text-center mb-10">How It Works</h2>
+    <h2 class="text-2xl font-serif font-bold text-center mb-10 text-warm-800 dark:text-warm-100">How It Works</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
         <div class="text-center">
             <div class="step-number mx-auto mb-4">1</div>
-            <h3 class="font-semibold text-warm-700 mb-2">Share Your Profile</h3>
+            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">Share Your Profile</h3>
             <p class="text-warm-400 text-sm">Paste your Goodreads profile URL and we'll pull your reading history</p>
         </div>
         <div class="text-center">
             <div class="step-number mx-auto mb-4">2</div>
-            <h3 class="font-semibold text-warm-700 mb-2">AI Analysis</h3>
+            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">AI Analysis</h3>
             <p class="text-warm-400 text-sm">Our AI digs through your books to build a psychological profile of your reading habits</p>
         </div>
         <div class="text-center">
             <div class="step-number mx-auto mb-4">3</div>
-            <h3 class="font-semibold text-warm-700 mb-2">Get Your Results</h3>
+            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">Get Your Results</h3>
             <p class="text-warm-400 text-sm">Personality profile, roast, vibe check, flags, and book recommendations</p>
         </div>
     </div>
@@ -54,26 +56,26 @@
 {% if recent %}
 <section>
     <div class="section-divider mb-10"></div>
-    <h2 class="text-2xl font-display font-bold mb-8">Recent Analyses</h2>
+    <h2 class="text-2xl font-serif font-bold mb-8 text-warm-800 dark:text-warm-100">Recent Analyses</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {% for profile in recent %}
         <a href="/u/{{ (profile.username or profile.goodreads_id)|slugify }}-{{ profile.goodreads_id }}"
-           class="profile-card block p-5 card-link">
-            <h3 class="font-display font-semibold text-lg text-warm-800">{{ profile.username or profile.goodreads_id }}</h3>
+           class="profile-card card-tilt block p-5 card-link">
+            <h3 class="font-display font-semibold text-lg text-warm-800 dark:text-warm-100">{{ profile.username or profile.goodreads_id }}</h3>
             <div class="flex items-center gap-3 mt-2">
-                <span class="inline-flex items-center bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                <span class="inline-flex items-center bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
                     {{ profile.book_count }} books
                 </span>
                 {% if profile.top_genre %}
-                <span class="inline-flex items-center bg-warm-100 text-warm-600 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                <span class="inline-flex items-center bg-warm-100 dark:bg-warm-700 text-warm-600 dark:text-warm-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
                     {{ profile.top_genre }}
                 </span>
                 {% endif %}
             </div>
             {% if profile.archetype %}
-            <p class="text-warm-500 text-sm mt-3 italic font-display">"{{ profile.archetype }}"</p>
+            <p class="text-warm-500 dark:text-warm-400 text-sm mt-3 italic font-display">"{{ profile.archetype }}"</p>
             {% endif %}
-            <p class="text-warm-300 text-xs mt-3">{{ profile.updated_at.strftime('%b %d, %Y') if profile.updated_at else '' }}</p>
+            <p class="text-warm-300 dark:text-warm-500 text-xs mt-3">{{ profile.updated_at.strftime('%b %d, %Y') if profile.updated_at else '' }}</p>
         </a>
         {% endfor %}
     </div>

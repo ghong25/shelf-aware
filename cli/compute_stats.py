@@ -77,7 +77,6 @@ def safe_int(value, default=None):
 
 def compute_hater_hype_index(books):
     """Compare user ratings to average ratings to determine rating tendency."""
-    points = []
     diffs = []
 
     for b in books:
@@ -85,35 +84,63 @@ def compute_hater_hype_index(books):
         avg_r = safe_float(b.get("average_rating"))
         if user_r is None or avg_r is None or user_r == 0:
             continue
-        diff = user_r - avg_r
-        diffs.append(diff)
-        points.append({
-            "x": round(avg_r, 2),
-            "y": round(user_r, 2),
-            "title": b.get("title", ""),
-        })
+        diffs.append(user_r - avg_r)
 
     if not diffs:
         return {
             "mean_diff": 0.0,
-            "label": "Fair Judge",
-            "scatter_data": {"points": []},
+            "label": "Straight Shooter",
+            "chart_data": {"labels": [], "values": []},
             "total_rated": 0,
         }
 
     mean_diff = statistics.mean(diffs)
+    total = len(diffs)
 
-    if mean_diff < -0.5:
-        label = "Contrarian Critic"
-    elif mean_diff > 0.5:
-        label = "Hype Beast"
+    # Count books where the user diverges from the crowd by >0.5 stars
+    hater_count = sum(1 for d in diffs if d < -0.5)
+    hype_count = sum(1 for d in diffs if d > 0.5)
+    strong_opinions = hater_count + hype_count
+
+    # Label based on direction AND intensity of strong opinions
+    strong_pct = strong_opinions / total
+    if strong_opinions == 0 or strong_pct < 0.15:
+        label = "Plays It Safe"
     else:
-        label = "Fair Judge"
+        hype_lean = hype_count / strong_opinions
+        opinionated = strong_pct >= 0.60
+        if hype_lean >= 0.75:
+            label = "Hype Machine"
+        elif hype_lean >= 0.58:
+            label = "Enthusiast" if opinionated else "Generous Reader"
+        elif hype_lean >= 0.42:
+            label = "Wild Card" if opinionated else "Straight Shooter"
+        elif hype_lean >= 0.25:
+            label = "Ruthless Critic" if opinionated else "Tough Grader"
+        else:
+            label = "Contrarian"
+
+    # Histogram: how far each rating diverges from the crowd
+    bucket_labels = ["< -1", "-1 to -.5", "-.5 to 0", "0 to +.5", "+.5 to +1", "> +1"]
+    bucket_counts = [0] * 6
+    for d in diffs:
+        if d < -1:
+            bucket_counts[0] += 1
+        elif d < -0.5:
+            bucket_counts[1] += 1
+        elif d < 0:
+            bucket_counts[2] += 1
+        elif d < 0.5:
+            bucket_counts[3] += 1
+        elif d < 1:
+            bucket_counts[4] += 1
+        else:
+            bucket_counts[5] += 1
 
     return {
         "mean_diff": round(mean_diff, 4),
         "label": label,
-        "scatter_data": {"points": points},
+        "chart_data": {"labels": bucket_labels, "values": bucket_counts},
         "total_rated": len(diffs),
     }
 

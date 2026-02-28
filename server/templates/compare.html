@@ -5,10 +5,10 @@
 {% block content %}
 <!-- ==================== HEADER ==================== -->
 <div class="mb-8 text-center">
-    <h1 class="text-3xl md:text-4xl font-display font-bold">
-        <a href="/u/{{ (profile_a.username or profile_a.goodreads_id)|slugify }}-{{ profile_a.goodreads_id }}" class="text-amber-700 hover:text-amber-800 transition-colors">{{ profile_a.username or profile_a.goodreads_id }}</a>
-        <span class="text-warm-300 mx-3 font-body text-lg">vs</span>
-        <a href="/u/{{ (profile_b.username or profile_b.goodreads_id)|slugify }}-{{ profile_b.goodreads_id }}" class="text-cyan-700 hover:text-cyan-800 transition-colors">{{ profile_b.username or profile_b.goodreads_id }}</a>
+    <h1 class="text-3xl md:text-4xl font-serif font-bold">
+        <a href="/u/{{ (profile_a.username or profile_a.goodreads_id)|slugify }}-{{ profile_a.goodreads_id }}" class="text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition-colors">{{ profile_a.username or profile_a.goodreads_id }}</a>
+        <span class="text-warm-300 dark:text-warm-500 mx-3 font-body text-lg">vs</span>
+        <a href="/u/{{ (profile_b.username or profile_b.goodreads_id)|slugify }}-{{ profile_b.goodreads_id }}" class="text-cyan-700 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 transition-colors">{{ profile_b.username or profile_b.goodreads_id }}</a>
     </h1>
 </div>
 
@@ -43,22 +43,22 @@
     <div class="card p-10 text-center max-w-lg mx-auto">
         <div class="compat-ring mx-auto mb-4" style="--score: {{ dynamics.compatibility_score }}">
             <div class="compat-ring-inner">
-                <p class="text-5xl font-display font-bold text-warm-800">{{ dynamics.compatibility_score }}%</p>
+                <p class="text-5xl font-display font-bold text-warm-800 dark:text-warm-100">{{ dynamics.compatibility_score }}%</p>
             </div>
         </div>
         <p class="text-warm-400 text-lg font-display italic">Literary Compatibility</p>
         {% if dynamics.compatibility_line %}
-        <p class="text-warm-500 mt-4 italic text-lg max-w-md mx-auto">"{{ dynamics.compatibility_line }}"</p>
+        <p class="text-warm-500 dark:text-warm-400 mt-4 italic text-lg max-w-md mx-auto">"{{ dynamics.compatibility_line }}"</p>
         {% endif %}
     </div>
 
     <!-- Dynamic Trope -->
     {% if dynamics.dynamic_trope %}
-    <div class="bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-200 rounded-xl p-8 mt-8 text-center">
-        <p class="text-sm text-violet-500 uppercase tracking-widest font-medium mb-2">The Dynamic</p>
-        <p class="text-3xl font-display font-bold text-violet-900 mb-3">{{ dynamics.dynamic_trope }}</p>
+    <div class="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950 dark:to-purple-950 border border-violet-200 dark:border-violet-800 rounded-xl p-8 mt-8 text-center">
+        <p class="text-sm text-violet-500 dark:text-violet-400 uppercase tracking-widest font-medium mb-2">The Dynamic</p>
+        <p class="text-3xl font-serif font-bold text-violet-900 dark:text-violet-100 mb-3">{{ dynamics.dynamic_trope }}</p>
         {% if dynamics.dynamic_explanation %}
-        <p class="text-violet-700 max-w-2xl mx-auto">{{ dynamics.dynamic_explanation }}</p>
+        <p class="text-violet-700 dark:text-violet-300 max-w-2xl mx-auto">{{ dynamics.dynamic_explanation }}</p>
         {% endif %}
     </div>
     {% endif %}
@@ -72,54 +72,54 @@
     <h2 class="section-heading text-3xl mb-8">The Numbers</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div class="card p-6 accent-left-amber">
-            <h3 class="font-display font-semibold text-lg mb-4 text-amber-700">{{ profile_a.username }}</h3>
+            <h3 class="font-display font-semibold text-lg mb-4 text-amber-700 dark:text-amber-400">{{ profile_a.username }}</h3>
             <div class="grid grid-cols-2 gap-4 text-center text-sm">
                 <div>
-                    <p class="text-2xl font-bold text-warm-800">{{ profile_a.book_count }}</p>
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ profile_a.book_count }}</p>
                     <p class="text-warm-400">Books</p>
                 </div>
                 {% if stats_a.get('hater_hype') %}
                 <div>
-                    <p class="text-2xl font-bold text-warm-800">{{ stats_a.hater_hype.label }}</p>
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats_a.hater_hype.label }}</p>
                     <p class="text-warm-400">Rating Style</p>
                 </div>
                 {% endif %}
                 {% if stats_a.get('attention_span') %}
                 <div>
-                    <p class="text-2xl font-bold text-warm-800">{{ stats_a.attention_span.avg_pages|int }}</p>
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats_a.attention_span.avg_pages|int }}</p>
                     <p class="text-warm-400">Avg Pages</p>
                 </div>
                 {% endif %}
                 {% if stats_a.get('genre_radar') %}
                 <div>
-                    <p class="text-2xl font-bold text-warm-800">{{ stats_a.genre_radar.top_genre }}</p>
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats_a.genre_radar.top_genre }}</p>
                     <p class="text-warm-400">Top Genre</p>
                 </div>
                 {% endif %}
             </div>
         </div>
         <div class="card p-6 accent-left-cyan">
-            <h3 class="font-display font-semibold text-lg mb-4 text-cyan-700">{{ profile_b.username }}</h3>
+            <h3 class="font-display font-semibold text-lg mb-4 text-cyan-700 dark:text-cyan-400">{{ profile_b.username }}</h3>
             <div class="grid grid-cols-2 gap-4 text-center text-sm">
                 <div>
-                    <p class="text-2xl font-bold text-warm-800">{{ profile_b.book_count }}</p>
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ profile_b.book_count }}</p>
                     <p class="text-warm-400">Books</p>
                 </div>
                 {% if stats_b.get('hater_hype') %}
                 <div>
-                    <p class="text-2xl font-bold text-warm-800">{{ stats_b.hater_hype.label }}</p>
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats_b.hater_hype.label }}</p>
                     <p class="text-warm-400">Rating Style</p>
                 </div>
                 {% endif %}
                 {% if stats_b.get('attention_span') %}
                 <div>
-                    <p class="text-2xl font-bold text-warm-800">{{ stats_b.attention_span.avg_pages|int }}</p>
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats_b.attention_span.avg_pages|int }}</p>
                     <p class="text-warm-400">Avg Pages</p>
                 </div>
                 {% endif %}
                 {% if stats_b.get('genre_radar') %}
                 <div>
-                    <p class="text-2xl font-bold text-warm-800">{{ stats_b.genre_radar.top_genre }}</p>
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats_b.genre_radar.top_genre }}</p>
                     <p class="text-warm-400">Top Genre</p>
                 </div>
                 {% endif %}
@@ -131,17 +131,17 @@
     {% if hard_stats.pace_vs_patience %}
     {% set pvp = hard_stats.pace_vs_patience %}
     <div class="card p-6 mb-8">
-        <h3 class="font-display font-semibold text-lg mb-4 text-warm-700">Pace vs Patience</h3>
+        <h3 class="font-display font-semibold text-lg mb-4 text-warm-700 dark:text-warm-200">Pace vs Patience</h3>
         <div class="grid grid-cols-2 gap-6">
             <div class="text-center">
                 <p class="text-sm text-warm-400 mb-3">Books per Year</p>
                 <div class="flex items-end justify-center gap-8">
                     <div>
-                        <p class="text-3xl font-bold text-amber-700">{{ pvp.user_a.books_per_year }}</p>
+                        <p class="text-3xl font-bold text-amber-700 dark:text-amber-400">{{ pvp.user_a.books_per_year }}</p>
                         <p class="text-xs text-warm-400 mt-1">{{ pvp.user_a.name }}</p>
                     </div>
                     <div>
-                        <p class="text-3xl font-bold text-cyan-700">{{ pvp.user_b.books_per_year }}</p>
+                        <p class="text-3xl font-bold text-cyan-700 dark:text-cyan-400">{{ pvp.user_b.books_per_year }}</p>
                         <p class="text-xs text-warm-400 mt-1">{{ pvp.user_b.name }}</p>
                     </div>
                 </div>
@@ -150,11 +150,11 @@
                 <p class="text-sm text-warm-400 mb-3">Avg Page Count</p>
                 <div class="flex items-end justify-center gap-8">
                     <div>
-                        <p class="text-3xl font-bold text-amber-700">{{ pvp.user_a.avg_pages }}</p>
+                        <p class="text-3xl font-bold text-amber-700 dark:text-amber-400">{{ pvp.user_a.avg_pages }}</p>
                         <p class="text-xs text-warm-400 mt-1">{{ pvp.user_a.label }}</p>
                     </div>
                     <div>
-                        <p class="text-3xl font-bold text-cyan-700">{{ pvp.user_b.avg_pages }}</p>
+                        <p class="text-3xl font-bold text-cyan-700 dark:text-cyan-400">{{ pvp.user_b.avg_pages }}</p>
                         <p class="text-xs text-warm-400 mt-1">{{ pvp.user_b.label }}</p>
                     </div>
                 </div>
@@ -167,17 +167,17 @@
     {% if hard_stats.rating_clash and not hard_stats.rating_clash.same_style %}
     {% set rc = hard_stats.rating_clash %}
     <div class="card p-6">
-        <h3 class="font-display font-semibold text-lg mb-4 text-warm-700">Rating Personality Clash</h3>
+        <h3 class="font-display font-semibold text-lg mb-4 text-warm-700 dark:text-warm-200">Rating Personality Clash</h3>
         <div class="grid grid-cols-2 gap-6 text-center">
             <div>
-                <p class="text-xl font-bold text-amber-700">{{ rc.user_a.label }}</p>
+                <p class="text-xl font-bold text-amber-700 dark:text-amber-400">{{ rc.user_a.label }}</p>
                 <p class="text-warm-400 text-sm">{{ rc.user_a.name }}</p>
-                <p class="text-warm-300 text-xs mt-1">Avg rating: {{ rc.user_a.average_rating }} &middot; {{ rc.user_a.pct_5_star }}% five-star</p>
+                <p class="text-warm-300 dark:text-warm-500 text-xs mt-1">Avg rating: {{ rc.user_a.average_rating }} &middot; {{ rc.user_a.pct_5_star }}% five-star</p>
             </div>
             <div>
-                <p class="text-xl font-bold text-cyan-700">{{ rc.user_b.label }}</p>
+                <p class="text-xl font-bold text-cyan-700 dark:text-cyan-400">{{ rc.user_b.label }}</p>
                 <p class="text-warm-400 text-sm">{{ rc.user_b.name }}</p>
-                <p class="text-warm-300 text-xs mt-1">Avg rating: {{ rc.user_b.average_rating }} &middot; {{ rc.user_b.pct_5_star }}% five-star</p>
+                <p class="text-warm-300 dark:text-warm-500 text-xs mt-1">Avg rating: {{ rc.user_b.average_rating }} &middot; {{ rc.user_b.pct_5_star }}% five-star</p>
             </div>
         </div>
     </div>
@@ -192,15 +192,15 @@
     <div class="card p-8">
         <div class="grid grid-cols-3 gap-4 text-center mb-6">
             <div>
-                <p class="text-3xl font-bold text-amber-700">{{ hard_stats.shared_shelf.only_a_count }}</p>
+                <p class="text-3xl font-bold text-amber-700 dark:text-amber-400">{{ hard_stats.shared_shelf.only_a_count }}</p>
                 <p class="text-warm-400 text-sm">Only {{ profile_a.username }}</p>
             </div>
             <div>
-                <p class="text-3xl font-bold text-emerald-700">{{ hard_stats.shared_shelf.shared_count }}</p>
+                <p class="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{{ hard_stats.shared_shelf.shared_count }}</p>
                 <p class="text-warm-400 text-sm">Both Read</p>
             </div>
             <div>
-                <p class="text-3xl font-bold text-cyan-700">{{ hard_stats.shared_shelf.only_b_count }}</p>
+                <p class="text-3xl font-bold text-cyan-700 dark:text-cyan-400">{{ hard_stats.shared_shelf.only_b_count }}</p>
                 <p class="text-warm-400 text-sm">Only {{ profile_b.username }}</p>
             </div>
         </div>
@@ -225,19 +225,19 @@
     <div class="card p-6">
         <div class="space-y-3">
             {% for rift in hard_stats.the_rift.biggest_rifts %}
-            <div class="flex items-center justify-between bg-warm-50 rounded-lg p-4">
+            <div class="flex items-center justify-between bg-warm-50 dark:bg-warm-800 rounded-lg p-4">
                 <div class="flex-1 min-w-0">
-                    <p class="font-display font-medium text-warm-800 truncate">{{ rift.title }}</p>
+                    <p class="font-display font-medium text-warm-800 dark:text-warm-100 truncate">{{ rift.title }}</p>
                     <p class="text-warm-400 text-xs">{{ rift.author }}</p>
                 </div>
                 <div class="flex items-center gap-6 ml-4 shrink-0">
                     <div class="text-center">
                         <p class="text-xs text-warm-400">{{ profile_a.username }}</p>
-                        <p class="text-lg font-bold text-amber-600">{{ '★' * rift.rating_a }}{{ '☆' * (5 - rift.rating_a) }}</p>
+                        <p class="text-lg font-bold text-amber-600 dark:text-amber-400">{{ '★' * rift.rating_a }}{{ '☆' * (5 - rift.rating_a) }}</p>
                     </div>
                     <div class="text-center">
                         <p class="text-xs text-warm-400">{{ profile_b.username }}</p>
-                        <p class="text-lg font-bold text-cyan-600">{{ '★' * rift.rating_b }}{{ '☆' * (5 - rift.rating_b) }}</p>
+                        <p class="text-lg font-bold text-cyan-600 dark:text-cyan-400">{{ '★' * rift.rating_b }}{{ '☆' * (5 - rift.rating_b) }}</p>
                     </div>
                 </div>
             </div>
@@ -258,14 +258,14 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         {% if hard_stats.genre_overlap %}
         <div class="card p-6">
-            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Genre Overlap</h3>
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Genre Overlap</h3>
             <p class="text-warm-400 text-xs mb-4">How their reading tastes compare</p>
             <canvas id="chart-genre-dual" height="260"></canvas>
         </div>
         {% endif %}
         {% if hard_stats.decades_alignment %}
         <div class="card p-6">
-            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700">Decades Alignment</h3>
+            <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Decades Alignment</h3>
             <p class="text-warm-400 text-xs mb-4">Which eras they gravitate toward</p>
             <canvas id="chart-decades-dual" height="260"></canvas>
             {% if hard_stats.decades_alignment.same_era %}
@@ -287,29 +287,29 @@
 
     {% if dynamics.whos_main_character %}
     {% set mc = dynamics.whos_main_character %}
-    <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-8 mb-8">
-        <h3 class="font-display font-bold text-xl text-amber-900 mb-3">Who's the Main Character?</h3>
-        <p class="text-amber-800 text-lg">
+    <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 border border-amber-200 dark:border-amber-800 rounded-xl p-8 mb-8">
+        <h3 class="font-serif font-bold text-xl text-amber-900 dark:text-amber-100 mb-3">Who's the Main Character?</h3>
+        <p class="text-amber-800 dark:text-amber-200 text-lg">
             <strong>{{ mc.main_character }}</strong> is the protagonist.
             <strong>{{ mc.sidekick }}</strong> is the sidekick.
         </p>
         {% if mc.explanation %}
-        <p class="text-amber-700 mt-3">{{ mc.explanation }}</p>
+        <p class="text-amber-700 dark:text-amber-300 mt-3">{{ mc.explanation }}</p>
         {% endif %}
     </div>
     {% endif %}
 
     {% if dynamics.desert_island %}
     <div class="card p-8 mb-8">
-        <h3 class="font-display font-bold text-xl text-warm-700 mb-3">The Desert Island Scenario</h3>
-        <p class="text-warm-600 whitespace-pre-line leading-relaxed">{{ dynamics.desert_island }}</p>
+        <h3 class="font-serif font-bold text-xl text-warm-700 dark:text-warm-200 mb-3">The Desert Island Scenario</h3>
+        <p class="text-warm-600 dark:text-warm-300 whitespace-pre-line leading-relaxed">{{ dynamics.desert_island }}</p>
     </div>
     {% endif %}
 
     {% if dynamics.what_they_argue_about %}
-    <div class="bg-gradient-to-br from-red-50 to-rose-50 border border-red-200 rounded-xl p-8 mb-8">
-        <h3 class="font-display font-bold text-xl text-red-900 mb-3">What They Argue About</h3>
-        <p class="text-red-800 text-lg">{{ dynamics.what_they_argue_about }}</p>
+    <div class="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950 dark:to-rose-950 border border-red-200 dark:border-red-800 rounded-xl p-8 mb-8">
+        <h3 class="font-serif font-bold text-xl text-red-900 dark:text-red-100 mb-3">What They Argue About</h3>
+        <p class="text-red-800 dark:text-red-200 text-lg">{{ dynamics.what_they_argue_about }}</p>
     </div>
     {% endif %}
 </section>
@@ -323,14 +323,14 @@
 
     {% if recs.bridge_books %}
     <div class="mb-10">
-        <h3 class="font-display font-semibold text-xl text-warm-700 mb-1">The Bridge Books</h3>
+        <h3 class="font-serif font-semibold text-xl text-warm-700 dark:text-warm-200 mb-1">The Bridge Books</h3>
         <p class="text-warm-400 text-sm mb-4">Books neither has read that perfectly intersect both tastes</p>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             {% for book in recs.bridge_books %}
-            <div class="card accent-left-emerald p-5">
-                <p class="font-display font-semibold text-warm-800">{{ book.title }}</p>
-                <p class="text-warm-500 text-sm">by {{ book.author }}</p>
-                <p class="text-warm-600 text-sm mt-2">{{ book.why }}</p>
+            <div class="card card-tilt accent-left-emerald p-5">
+                <p class="font-display font-semibold text-warm-800 dark:text-warm-100">{{ book.title }}</p>
+                <p class="text-warm-500 dark:text-warm-400 text-sm">by {{ book.author }}</p>
+                <p class="text-warm-600 dark:text-warm-300 text-sm mt-2">{{ book.why }}</p>
             </div>
             {% endfor %}
         </div>
@@ -339,28 +339,28 @@
 
     {% if recs.book_swap %}
     <div>
-        <h3 class="font-display font-semibold text-xl text-warm-700 mb-4">The Book Swap</h3>
+        <h3 class="font-serif font-semibold text-xl text-warm-700 dark:text-warm-200 mb-4">The Book Swap</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {% if recs.book_swap.a_should_read %}
             <div>
-                <h4 class="font-display font-medium text-amber-700 mb-3">{{ profile_a.username }} should read:</h4>
+                <h4 class="font-display font-medium text-amber-700 dark:text-amber-400 mb-3">{{ profile_a.username }} should read:</h4>
                 {% for book in recs.book_swap.a_should_read %}
-                <div class="card accent-left-amber p-4 mb-3">
-                    <p class="font-semibold text-warm-800 text-sm">{{ book.title }}</p>
-                    <p class="text-warm-500 text-xs">by {{ book.author }}</p>
-                    <p class="text-warm-600 text-xs mt-1">{{ book.why }}</p>
+                <div class="card card-tilt accent-left-amber p-4 mb-3">
+                    <p class="font-semibold text-warm-800 dark:text-warm-100 text-sm">{{ book.title }}</p>
+                    <p class="text-warm-500 dark:text-warm-400 text-xs">by {{ book.author }}</p>
+                    <p class="text-warm-600 dark:text-warm-300 text-xs mt-1">{{ book.why }}</p>
                 </div>
                 {% endfor %}
             </div>
             {% endif %}
             {% if recs.book_swap.b_should_read %}
             <div>
-                <h4 class="font-display font-medium text-cyan-700 mb-3">{{ profile_b.username }} should read:</h4>
+                <h4 class="font-display font-medium text-cyan-700 dark:text-cyan-400 mb-3">{{ profile_b.username }} should read:</h4>
                 {% for book in recs.book_swap.b_should_read %}
-                <div class="card accent-left-cyan p-4 mb-3">
-                    <p class="font-semibold text-warm-800 text-sm">{{ book.title }}</p>
-                    <p class="text-warm-500 text-xs">by {{ book.author }}</p>
-                    <p class="text-warm-600 text-xs mt-1">{{ book.why }}</p>
+                <div class="card card-tilt accent-left-cyan p-4 mb-3">
+                    <p class="font-semibold text-warm-800 dark:text-warm-100 text-sm">{{ book.title }}</p>
+                    <p class="text-warm-500 dark:text-warm-400 text-xs">by {{ book.author }}</p>
+                    <p class="text-warm-600 dark:text-warm-300 text-xs mt-1">{{ book.why }}</p>
                 </div>
                 {% endfor %}
             </div>

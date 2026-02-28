@@ -59,6 +59,7 @@ async def _render_profile(request: Request, goodreads_id: str):
         "ai_blind_spots",
         "ai_reading_evolution",
         "ai_recommendations",
+        "ai_deep_profile",
     ]:
         val = profile.get(key)
         if val is not None:
@@ -98,7 +99,8 @@ async def profile_api(goodreads_id: str):
                     "ai_red_green_flags",
                     "ai_blind_spots",
                     "ai_reading_evolution",
-                "ai_recommendations",
+                    "ai_recommendations",
+                    "ai_deep_profile",
                 ]
                 if profile.get(k)
             },

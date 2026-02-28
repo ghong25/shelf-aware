@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     ai_blind_spots      JSONB,
     ai_reading_evolution JSONB,
     ai_recommendations  JSONB,
+    ai_deep_profile     JSONB,
     created_at          TIMESTAMPTZ DEFAULT NOW(),
     updated_at          TIMESTAMPTZ DEFAULT NOW()
 );

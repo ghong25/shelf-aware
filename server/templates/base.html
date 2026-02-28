@@ -4,12 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Shelf Aware{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+        // Anti-FOUC: apply dark mode before paint
+        (function() {
+            if (localStorage.getItem('shelf-aware-dark') === 'true') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -34,6 +44,7 @@
                     fontFamily: {
                         display: ['"DM Sans"', 'system-ui', 'sans-serif'],
                         body: ['Inter', 'system-ui', 'sans-serif'],
+                        serif: ['"Playfair Display"', 'Georgia', 'serif'],
                     },
                 },
             },
@@ -43,14 +54,24 @@
     <link rel="stylesheet" href="/static/css/style.css">
     {% block head %}{% endblock %}
 </head>
-<body class="bg-cream-50 text-warm-800 min-h-screen font-body">
-    <nav class="bg-warm-800 text-cream-100 py-4 px-6 shadow-lg" id="main-nav">
+<body class="bg-cream-50 dark:bg-warm-900 text-warm-800 dark:text-warm-100 min-h-screen font-body">
+    <nav class="bg-warm-800 dark:bg-warm-900 dark:border-b dark:border-warm-700 text-cream-100 py-4 px-6 shadow-lg" id="main-nav">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-6">
                 <a href="/" class="text-xl font-display font-bold tracking-tight text-cream-50 hover:text-amber-300 transition-colors">Shelf Aware</a>
                 <a href="/" class="text-sm text-warm-300 hover:text-cream-100 transition-colors hidden sm:inline">Home</a>
             </div>
-            <span class="text-warm-400 text-sm italic font-display hidden sm:inline">what your bookshelf says about you</span>
+            <div class="flex items-center gap-4">
+                <span class="text-warm-400 text-sm italic font-display hidden sm:inline">what your bookshelf says about you</span>
+                <button id="dark-mode-toggle" class="p-2 rounded-lg text-warm-300 hover:text-cream-50 hover:bg-warm-700 transition-colors" aria-label="Toggle dark mode">
+                    <svg id="icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                    <svg id="icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+            </div>
         </div>
     </nav>
 
@@ -58,12 +79,37 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="text-center text-warm-400 text-sm py-8 border-t border-warm-200 mt-12">
+    <footer class="text-center text-warm-400 text-sm py-8 border-t border-warm-200 dark:border-warm-700 mt-12">
         <p class="font-display italic">Shelf Aware</p>
         <p class="text-warm-300 text-xs mt-1">AI-powered reading personality analysis</p>
     </footer>
 
     <script src="/static/js/charts.js"></script>
+    <script>
+        // Dark mode toggle
+        (function() {
+            const toggle = document.getElementById('dark-mode-toggle');
+            const iconMoon = document.getElementById('icon-moon');
+            const iconSun = document.getElementById('icon-sun');
+
+            function updateIcon() {
+                const isDark = document.documentElement.classList.contains('dark');
+                iconMoon.classList.toggle('hidden', isDark);
+                iconSun.classList.toggle('hidden', !isDark);
+            }
+
+            updateIcon();
+
+            toggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                const isDark = document.documentElement.classList.contains('dark');
+                localStorage.setItem('shelf-aware-dark', isDark);
+                updateIcon();
+                // Dispatch event for charts to re-render
+                window.dispatchEvent(new CustomEvent('darkModeToggle', { detail: { dark: isDark } }));
+            });
+        })();
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
