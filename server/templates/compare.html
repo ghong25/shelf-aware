@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_a.username }} vs {{ profile_b.username }} - Shelf Aware{% endblock %}
+
+{% block content %}
+<div class="mb-8 text-center">
+    <h1 class="text-3xl font-bold">
+        <a href="/u/{{ profile_a.goodreads_id }}" class="hover:underline">{{ profile_a.username or profile_a.goodreads_id }}</a>
+        <span class="text-stone-400 mx-2">vs</span>
+        <a href="/u/{{ profile_b.goodreads_id }}" class="hover:underline">{{ profile_b.username or profile_b.goodreads_id }}</a>
+    </h1>
+</div>
+
+<!-- ==================== COMPATIBILITY HERO ==================== -->
+{% if dynamics.compatibility_score is defined %}
+<div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 text-center mb-8 max-w-lg mx-auto">
+    <p class="text-6xl font-bold mb-2">{{ dynamics.compatibility_score }}%</p>
+    <p class="text-stone-500 text-lg">Literary Compatibility</p>
+    {% if dynamics.compatibility_line %}
+    <p class="text-stone-600 mt-3 italic text-lg">"{{ dynamics.compatibility_line }}"</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ==================== DYNAMIC TROPE ==================== -->
+{% if dynamics.dynamic_trope %}
+<div class="bg-violet-50 border border-violet-200 rounded-xl p-6 mb-8 text-center">
+    <p class="text-sm text-violet-500 uppercase tracking-wide font-medium mb-1">The Dynamic</p>
+    <p class="text-2xl font-bold text-violet-900 mb-2">{{ dynamics.dynamic_trope }}</p>
+    {% if dynamics.dynamic_explanation %}
+    <p class="text-violet-700 max-w-2xl mx-auto">{{ dynamics.dynamic_explanation }}</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ==================== HARD STATS: SIDE-BY-SIDE ==================== -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
+        <h3 class="font-semibold mb-3 text-center text-amber-700">{{ profile_a.username }}</h3>
+        <div class="grid grid-cols-2 gap-3 text-center text-sm">
+            <div>
+                <p class="text-xl font-bold">{{ profile_a.book_count }}</p>
+                <p class="text-stone-500">Books</p>
+            </div>
+            {% if stats_a.get('hater_hype') %}
+            <div>
+                <p class="text-xl font-bold">{{ stats_a.hater_hype.label }}</p>
+                <p class="text-stone-500">Rating Style</p>
+            </div>
+            {% endif %}
+            {% if stats_a.get('attention_span') %}
+            <div>
+                <p class="text-xl font-bold">{{ stats_a.attention_span.avg_pages|int }}</p>
+                <p class="text-stone-500">Avg Pages</p>
+            </div>
+            {% endif %}
+            {% if stats_a.get('genre_radar') %}
+            <div>
+                <p class="text-xl font-bold">{{ stats_a.genre_radar.top_genre }}</p>
+                <p class="text-stone-500">Top Genre</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
+        <h3 class="font-semibold mb-3 text-center text-cyan-700">{{ profile_b.username }}</h3>
+        <div class="grid grid-cols-2 gap-3 text-center text-sm">
+            <div>
+                <p class="text-xl font-bold">{{ profile_b.book_count }}</p>
+                <p class="text-stone-500">Books</p>
+            </div>
+            {% if stats_b.get('hater_hype') %}
+            <div>
+                <p class="text-xl font-bold">{{ stats_b.hater_hype.label }}</p>
+                <p class="text-stone-500">Rating Style</p>
+            </div>
+            {% endif %}
+            {% if stats_b.get('attention_span') %}
+            <div>
+                <p class="text-xl font-bold">{{ stats_b.attention_span.avg_pages|int }}</p>
+                <p class="text-stone-500">Avg Pages</p>
+            </div>
+            {% endif %}
+            {% if stats_b.get('genre_radar') %}
+            <div>
+                <p class="text-xl font-bold">{{ stats_b.genre_radar.top_genre }}</p>
+                <p class="text-stone-500">Top Genre</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ==================== THE SHARED SHELF ==================== -->
+{% if hard_stats.shared_shelf %}
+<div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 mb-8">
+    <h3 class="font-semibold text-lg mb-4">The Shared Shelf</h3>
+    <div class="grid grid-cols-3 gap-4 text-center mb-4">
+        <div>
+            <p class="text-2xl font-bold text-amber-600">{{ hard_stats.shared_shelf.only_a_count }}</p>
+            <p class="text-stone-500 text-sm">Only {{ profile_a.username }}</p>
+        </div>
+        <div>
+            <p class="text-2xl font-bold text-emerald-600">{{ hard_stats.shared_shelf.shared_count }}</p>
+            <p class="text-stone-500 text-sm">Both Read</p>
+        </div>
+        <div>
+            <p class="text-2xl font-bold text-cyan-600">{{ hard_stats.shared_shelf.only_b_count }}</p>
+            <p class="text-stone-500 text-sm">Only {{ profile_b.username }}</p>
+        </div>
+    </div>
+    <!-- Simple venn bar -->
+    {% set total = hard_stats.shared_shelf.only_a_count + hard_stats.shared_shelf.shared_count + hard_stats.shared_shelf.only_b_count %}
+    {% if total > 0 %}
+    <div class="flex rounded-full overflow-hidden h-4">
+        <div class="bg-amber-400" style="width: {{ (hard_stats.shared_shelf.only_a_count / total * 100)|round }}%"></div>
+        <div class="bg-emerald-400" style="width: {{ (hard_stats.shared_shelf.shared_count / total * 100)|round }}%"></div>
+        <div class="bg-cyan-400" style="width: {{ (hard_stats.shared_shelf.only_b_count / total * 100)|round }}%"></div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ==================== THE RIFT ==================== -->
+{% if hard_stats.the_rift and hard_stats.the_rift.biggest_rifts %}
+<div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 mb-8">
+    <h3 class="font-semibold text-lg mb-1">The Rift</h3>
+    <p class="text-stone-500 text-sm mb-4">Books they both read but couldn't disagree more on</p>
+    <div class="space-y-3">
+        {% for rift in hard_stats.the_rift.biggest_rifts %}
+        <div class="flex items-center justify-between bg-stone-50 rounded-lg p-3">
+            <div class="flex-1 min-w-0">
+                <p class="font-medium truncate">{{ rift.title }}</p>
+                <p class="text-stone-500 text-xs">{{ rift.author }}</p>
+            </div>
+            <div class="flex items-center gap-4 ml-4 shrink-0">
+                <div class="text-center">
+                    <p class="text-xs text-stone-400">{{ profile_a.username }}</p>
+                    <p class="text-lg font-bold text-amber-600">{{ '★' * rift.rating_a }}{{ '☆' * (5 - rift.rating_a) }}</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-stone-400">{{ profile_b.username }}</p>
+                    <p class="text-lg font-bold text-cyan-600">{{ '★' * rift.rating_b }}{{ '☆' * (5 - rift.rating_b) }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if hard_stats.the_rift.perfect_agreements > 0 %}
+    <p class="text-stone-500 text-sm mt-4">They agreed perfectly on {{ hard_stats.the_rift.perfect_agreements }} book{{ 's' if hard_stats.the_rift.perfect_agreements != 1 }}{% if hard_stats.the_rift.agreement_examples %}, including {% for ex in hard_stats.the_rift.agreement_examples %}<em>{{ ex.title }}</em>{{ ', ' if not loop.last }}{% endfor %}{% endif %}.</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ==================== PACE vs PATIENCE ==================== -->
+{% if hard_stats.pace_vs_patience %}
+{% set pvp = hard_stats.pace_vs_patience %}
+<div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 mb-8">
+    <h3 class="font-semibold text-lg mb-4">Pace vs Patience</h3>
+    <div class="grid grid-cols-2 gap-6">
+        <div class="text-center">
+            <p class="text-sm text-stone-400 mb-2">Books per Year</p>
+            <div class="flex items-end justify-center gap-6">
+                <div>
+                    <p class="text-3xl font-bold text-amber-600">{{ pvp.user_a.books_per_year }}</p>
+                    <p class="text-xs text-stone-500">{{ pvp.user_a.name }}</p>
+                </div>
+                <div>
+                    <p class="text-3xl font-bold text-cyan-600">{{ pvp.user_b.books_per_year }}</p>
+                    <p class="text-xs text-stone-500">{{ pvp.user_b.name }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="text-center">
+            <p class="text-sm text-stone-400 mb-2">Avg Page Count</p>
+            <div class="flex items-end justify-center gap-6">
+                <div>
+                    <p class="text-3xl font-bold text-amber-600">{{ pvp.user_a.avg_pages }}</p>
+                    <p class="text-xs text-stone-500">{{ pvp.user_a.label }}</p>
+                </div>
+                <div>
+                    <p class="text-3xl font-bold text-cyan-600">{{ pvp.user_b.avg_pages }}</p>
+                    <p class="text-xs text-stone-500">{{ pvp.user_b.label }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ==================== RATING PERSONALITY CLASH ==================== -->
+{% if hard_stats.rating_clash and not hard_stats.rating_clash.same_style %}
+{% set rc = hard_stats.rating_clash %}
+<div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 mb-8">
+    <h3 class="font-semibold text-lg mb-4">Rating Personality Clash</h3>
+    <div class="grid grid-cols-2 gap-6 text-center">
+        <div>
+            <p class="text-xl font-bold text-amber-600">{{ rc.user_a.label }}</p>
+            <p class="text-stone-500 text-sm">{{ rc.user_a.name }}</p>
+            <p class="text-stone-400 text-xs mt-1">Avg rating: {{ rc.user_a.average_rating }} &middot; {{ rc.user_a.pct_5_star }}% five-star</p>
+        </div>
+        <div>
+            <p class="text-xl font-bold text-cyan-600">{{ rc.user_b.label }}</p>
+            <p class="text-stone-500 text-sm">{{ rc.user_b.name }}</p>
+            <p class="text-stone-400 text-xs mt-1">Avg rating: {{ rc.user_b.average_rating }} &middot; {{ rc.user_b.pct_5_star }}% five-star</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ==================== CHARTS: GENRE OVERLAP + DECADES ==================== -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    {% if hard_stats.genre_overlap %}
+    <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
+        <h3 class="font-semibold mb-3">Genre Overlap</h3>
+        <canvas id="chart-genre-dual" height="260"></canvas>
+    </div>
+    {% endif %}
+    {% if hard_stats.decades_alignment %}
+    <div class="bg-white rounded-lg shadow-sm border border-stone-200 p-5">
+        <h3 class="font-semibold mb-3">Decades Alignment</h3>
+        <canvas id="chart-decades-dual" height="260"></canvas>
+        {% if hard_stats.decades_alignment.same_era %}
+        <p class="text-stone-500 text-xs mt-2 text-center">Both gravitate toward the {{ hard_stats.decades_alignment.dominant_a }}</p>
+        {% elif hard_stats.decades_alignment.dominant_a and hard_stats.decades_alignment.dominant_b %}
+        <p class="text-stone-500 text-xs mt-2 text-center">{{ profile_a.username }}: {{ hard_stats.decades_alignment.dominant_a }} &middot; {{ profile_b.username }}: {{ hard_stats.decades_alignment.dominant_b }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- ==================== AI: WHO'S THE MAIN CHARACTER ==================== -->
+{% if dynamics.whos_main_character %}
+{% set mc = dynamics.whos_main_character %}
+<div class="bg-amber-50 border border-amber-200 rounded-xl p-6 mb-8">
+    <h3 class="font-semibold text-lg mb-2 text-amber-900">Who's the Main Character?</h3>
+    <p class="text-amber-800">
+        <strong>{{ mc.main_character }}</strong> is the protagonist.
+        <strong>{{ mc.sidekick }}</strong> is the sidekick.
+    </p>
+    {% if mc.explanation %}
+    <p class="text-amber-700 mt-2 text-sm">{{ mc.explanation }}</p>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- ==================== AI: DESERT ISLAND ==================== -->
+{% if dynamics.desert_island %}
+<div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 mb-8">
+    <h3 class="font-semibold text-lg mb-2">The Desert Island Scenario</h3>
+    <p class="text-stone-700 whitespace-pre-line">{{ dynamics.desert_island }}</p>
+</div>
+{% endif %}
+
+<!-- ==================== AI: WHAT THEY ARGUE ABOUT ==================== -->
+{% if dynamics.what_they_argue_about %}
+<div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-8">
+    <h3 class="font-semibold text-lg mb-2 text-red-900">What They Argue About</h3>
+    <p class="text-red-800">{{ dynamics.what_they_argue_about }}</p>
+</div>
+{% endif %}
+
+<!-- ==================== BRIDGE BOOKS ==================== -->
+{% if recs.bridge_books %}
+<div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 mb-8">
+    <h3 class="font-semibold text-lg mb-1">The Bridge Books</h3>
+    <p class="text-stone-500 text-sm mb-4">Books neither has read that perfectly intersect both tastes</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {% for book in recs.bridge_books %}
+        <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+            <p class="font-semibold text-emerald-900">{{ book.title }}</p>
+            <p class="text-emerald-700 text-sm">by {{ book.author }}</p>
+            <p class="text-emerald-800 text-sm mt-2">{{ book.why }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- ==================== BOOK SWAP ==================== -->
+{% if recs.book_swap %}
+<div class="bg-white rounded-xl shadow-sm border border-stone-200 p-6 mb-8">
+    <h3 class="font-semibold text-lg mb-4">The Book Swap</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% if recs.book_swap.a_should_read %}
+        <div>
+            <h4 class="font-medium text-amber-700 mb-3">{{ profile_a.username }} should read:</h4>
+            {% for book in recs.book_swap.a_should_read %}
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+                <p class="font-semibold text-amber-900 text-sm">{{ book.title }}</p>
+                <p class="text-amber-700 text-xs">by {{ book.author }}</p>
+                <p class="text-amber-800 text-xs mt-1">{{ book.why }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if recs.book_swap.b_should_read %}
+        <div>
+            <h4 class="font-medium text-cyan-700 mb-3">{{ profile_b.username }} should read:</h4>
+            {% for book in recs.book_swap.b_should_read %}
+            <div class="bg-cyan-50 border border-cyan-200 rounded-lg p-3 mb-3">
+                <p class="font-semibold text-cyan-900 text-sm">{{ book.title }}</p>
+                <p class="text-cyan-700 text-xs">by {{ book.author }}</p>
+                <p class="text-cyan-800 text-xs mt-1">{{ book.why }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const compData = {{ comp_json | safe }};
+
+    if (compData.genre_overlap && compData.genre_overlap.dual_chart_data)
+        renderDualRadar('chart-genre-dual', compData.genre_overlap.dual_chart_data,
+            '{{ profile_a.username }}', '{{ profile_b.username }}');
+
+    if (compData.decades_alignment && compData.decades_alignment.dual_chart_data)
+        renderDualBar('chart-decades-dual', compData.decades_alignment.dual_chart_data,
+            '{{ profile_a.username }}', '{{ profile_b.username }}');
+</script>
+{% endblock %}

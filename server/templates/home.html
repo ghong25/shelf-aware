@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Shelf Aware - What Your Bookshelf Says About You{% endblock %}
+
+{% block content %}
+<div class="text-center py-16">
+    <h1 class="text-5xl font-bold mb-4">Shelf Aware</h1>
+    <p class="text-xl text-stone-600 mb-2">What your bookshelf says about you.</p>
+    <p class="text-stone-500 mb-8">AI-powered analysis of your Goodreads reading history</p>
+
+    <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 max-w-xl mx-auto">
+        <p class="text-stone-600 mb-4">To analyze a profile, run in Claude Code:</p>
+        <code class="block bg-stone-800 text-green-400 rounded-lg px-4 py-3 text-sm font-mono">
+            /shelf-aware https://goodreads.com/user/show/YOUR_ID
+        </code>
+    </div>
+</div>
+
+{% if error %}
+<div class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 mb-8 max-w-xl mx-auto">
+    {{ error }}
+</div>
+{% endif %}
+
+{% if recent %}
+<section class="mt-8">
+    <h2 class="text-2xl font-semibold mb-6">Recent Analyses</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for profile in recent %}
+        <a href="/u/{{ profile.goodreads_id }}"
+           class="block bg-white rounded-lg shadow-sm border border-stone-200 p-5 hover:shadow-md transition-shadow">
+            <h3 class="font-semibold text-lg">{{ profile.username or profile.goodreads_id }}</h3>
+            <p class="text-stone-500 text-sm">{{ profile.book_count }} books</p>
+            <p class="text-stone-400 text-xs mt-2">{{ profile.updated_at.strftime('%b %d, %Y') if profile.updated_at else '' }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

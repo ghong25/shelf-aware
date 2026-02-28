@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: shelf-aware
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn server.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shelf-aware-db
+          property: connectionString
+
+databases:
+  - name: shelf-aware-db
+    plan: free
