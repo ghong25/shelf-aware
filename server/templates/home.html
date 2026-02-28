@@ -81,4 +81,34 @@
     </div>
 </section>
 {% endif %}
+
+{% if recent_comparisons %}
+<section>
+    <div class="section-divider mb-10"></div>
+    <h2 class="text-2xl font-serif font-bold mb-2 text-warm-800 dark:text-warm-100">Head-to-Head</h2>
+    <p class="text-warm-400 mb-8 text-sm">Compare two readers' shelves to find out how compatible they really are</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {% for comp in recent_comparisons %}
+        <a href="/compare/{{ (comp.username_a or comp.id_a)|slugify }}-{{ comp.id_a }}-vs-{{ (comp.username_b or comp.id_b)|slugify }}-{{ comp.id_b }}"
+           class="card card-tilt card-link block p-5">
+            <div class="flex items-center gap-2 mb-3">
+                <span class="font-display font-semibold text-amber-700 dark:text-amber-400">{{ comp.username_a or comp.id_a }}</span>
+                <span class="text-warm-300 dark:text-warm-500 text-sm">vs</span>
+                <span class="font-display font-semibold text-cyan-700 dark:text-cyan-400">{{ comp.username_b or comp.id_b }}</span>
+            </div>
+            {% if comp.compatibility_score %}
+            <div class="flex items-center gap-3">
+                <span class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ comp.compatibility_score }}%</span>
+                <span class="text-warm-400 text-xs">compatible</span>
+            </div>
+            {% endif %}
+            {% if comp.dynamic_trope %}
+            <p class="text-warm-500 dark:text-warm-400 text-xs mt-2 italic font-display">{{ comp.dynamic_trope }}</p>
+            {% endif %}
+            <p class="text-warm-300 dark:text-warm-500 text-xs mt-3">{{ comp.created_at.strftime('%b %d, %Y') if comp.created_at else '' }}</p>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}

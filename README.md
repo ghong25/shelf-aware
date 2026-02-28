@@ -117,6 +117,23 @@ Both comparison agents receive both readers' full book lists and run simultaneou
 >     "main_character": "name of the person who reads like a protagonist",
 >     "sidekick": "the other person",
 >     "explanation": "why, referencing their genres and specific books"
+>   },
+>   "superlatives": {
+>     "abandon_boring":      {"winner": "name of whichever reader is more likely to DNF a book", "evidence": "one sentence citing specific titles or patterns"},
+>     "booktok_susceptible": {"winner": "name", "evidence": "one sentence"},
+>     "harsher_critic":      {"winner": "name of the reader with the lower average rating from comparison_stats_json", "evidence": "cite their average rating vs the other's"},
+>     "survive_dystopia":    {"winner": "name", "evidence": "one sentence"}
+>   },
+>   "escape_room": "3-sentence IKEA flat-pack assembly / escape room scenario based strictly on problem-solving temperaments revealed by their books — who leads, who panics, who rage-quits",
+>   "dealbreaker": "1 paragraph: the catastrophic falling-out inciting incident synthesized from both readers' red flags and most incompatible reading habits — be specific and dramatic",
+>   "cognitive_diet": {
+>     "user_a": {"axes": "e.g. Systemic + Confrontational", "description": "2 sentences on how they process information through books"},
+>     "user_b": {"axes": "e.g. Intimate + Confrontational", "description": "2 sentences"},
+>     "synthesis": "1 sentence contrasting their intellectual approaches"
+>   },
+>   "five_star_philosophy": {
+>     "user_a": {"rule": "short label e.g. Structural Epiphany", "description": "1-2 sentences on what earns 5 stars from them, based on their actual 5-star books"},
+>     "user_b": {"rule": "short label e.g. Emotional Devastation", "description": "1-2 sentences"}
 >   }
 > }
 > ```
@@ -129,13 +146,19 @@ Both comparison agents receive both readers' full book lists and run simultaneou
 >   "bridge_books": [
 >     {"title": "book title", "author": "author name", "why": "why this book perfectly intersects BOTH of their distinct tastes — reference specific books/genres from each person's shelf"}
 >   ] // exactly 3 books that NEITHER person has read
->   "book_swap": {
->     "a_should_read": [
->       {"title": "a book from B's shelf", "author": "author", "why": "why <user_a> specifically would love this based on their taste"}
->     ] // exactly 3 — must be books Person B has actually read that Person A has not
->     "b_should_read": [
->       {"title": "a book from A's shelf", "author": "author", "why": "why <user_b> specifically would love this based on their taste"}
->     ] // exactly 3 — must be books Person A has actually read that Person B has not
+>   "the_compromise": {
+>     "for_a": {
+>       "title": "exactly one book from B's 5-star shelf (or 4-star if no 5-stars)",
+>       "author": "author name",
+>       "why": "why <user_a> shouldn't roll their eyes at this — reference their specific tastes. Do not pick obvious crowd-pleasers; find the one book that bridges their specific tastes.",
+>       "from_shelf": "5-star"
+>     },
+>     "for_b": {
+>       "title": "exactly one book from A's 5-star shelf (or 4-star if no 5-stars)",
+>       "author": "author name",
+>       "why": "why <user_b> would specifically love this",
+>       "from_shelf": "5-star"
+>     }
 >   }
 > }
 > ```

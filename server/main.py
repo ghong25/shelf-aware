@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from server.database import close_pool, get_recent_profiles, init_pool
+from server.database import close_pool, get_recent_comparisons, get_recent_profiles, init_pool
 from server.routers import comparisons, profiles
 from server.routers.profiles import slugify
 
@@ -35,8 +35,10 @@ app.include_router(comparisons.router)
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     recent = await get_recent_profiles(limit=12)
+    recent_comparisons = await get_recent_comparisons(limit=6)
     return templates.TemplateResponse(
-        "home.html", {"request": request, "recent": recent, "error": None}
+        "home.html", {"request": request, "recent": recent,
+                      "recent_comparisons": recent_comparisons, "error": None}
     )
 
 

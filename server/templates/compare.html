@@ -32,9 +32,12 @@
         <a href="#section-compat" class="section-nav-item active" data-section="section-compat">Compatibility</a>
         {% endif %}
         {% if ai_a.psychological or ai_b.psychological %}
-        <a href="#section-meet" class="section-nav-item" data-section="section-meet">Meet the Readers</a>
+        <a href="#section-dossier" class="section-nav-item" data-section="section-dossier">The Dossier</a>
         {% endif %}
         <a href="#section-stats" class="section-nav-item" data-section="section-stats">Stats</a>
+        {% if dynamics.superlatives %}
+        <a href="#section-superlatives" class="section-nav-item" data-section="section-superlatives">Superlatives</a>
+        {% endif %}
         {% if hard_stats.shared_shelf %}
         <a href="#section-shared" class="section-nav-item" data-section="section-shared">Shared Shelf</a>
         {% endif %}
@@ -44,11 +47,11 @@
         {% if hard_stats.genre_overlap or hard_stats.decades_alignment %}
         <a href="#section-charts" class="section-nav-item" data-section="section-charts">Charts</a>
         {% endif %}
-        {% if dynamics.whos_main_character or dynamics.desert_island or dynamics.what_they_argue_about %}
-        <a href="#section-dynamics" class="section-nav-item" data-section="section-dynamics">AI Dynamics</a>
+        {% if dynamics.what_they_argue_about or dynamics.what_each_brings or dynamics.one_book_that_changes_everything or dynamics.their_book_club or dynamics.alter_egos or dynamics.reading_dynamic %}
+        <a href="#section-dynamics" class="section-nav-item" data-section="section-dynamics">The Dynamic</a>
         {% endif %}
-        {% if recs.bridge_books or recs.book_swap %}
-        <a href="#section-recs" class="section-nav-item" data-section="section-recs">Recommendations</a>
+        {% if dynamics.cognitive_diet or dynamics.five_star_philosophy %}
+        <a href="#section-deep" class="section-nav-item" data-section="section-deep">Deep Cuts</a>
         {% endif %}
     </div>
 </nav>
@@ -83,163 +86,69 @@
 
 <div class="section-divider"></div>
 
-<!-- ==================== MEET THE READERS ==================== -->
+<!-- ==================== THE DOSSIER ==================== -->
 {% if ai_a.psychological or ai_b.psychological %}
-<section id="section-meet" class="story-section">
-    <h2 class="section-heading text-3xl mb-2">Meet the Readers</h2>
+<section id="section-dossier" class="story-section">
+    <h2 class="section-heading text-3xl mb-2">The Dossier</h2>
     <p class="text-warm-400 mb-8">What their shelves say about who they are</p>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-
-        <!-- Reader A psychological snapshot -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Reader A -->
         {% set psych_a = ai_a.psychological %}
         <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
-            <h3 class="font-serif font-bold text-lg text-amber-900 dark:text-amber-100 mb-4">{{ profile_a.username }}</h3>
+            <div class="flex items-start justify-between mb-4 gap-3">
+                <h3 class="font-serif font-bold text-lg text-amber-900 dark:text-amber-100">{{ profile_a.username }}</h3>
+                {% if psych_a and psych_a.archetype %}
+                <span class="shrink-0 bg-amber-800 dark:bg-amber-700 text-amber-100 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">{{ psych_a.archetype }}</span>
+                {% endif %}
+            </div>
             {% if psych_a %}
-                {% if psych_a.archetype %}
-                <div class="inline-block bg-white/70 dark:bg-white/10 border border-amber-300 dark:border-amber-700 rounded-lg px-4 py-2 mb-4">
-                    <p class="font-display font-bold text-amber-800 dark:text-amber-200">{{ psych_a.archetype }}</p>
-                </div>
-                {% endif %}
-                {% if psych_a.summary %}
-                <p class="text-amber-800 dark:text-amber-200 text-sm leading-relaxed mb-4">{{ psych_a.summary }}</p>
-                {% endif %}
                 {% if psych_a.traits %}
-                <div class="flex flex-wrap gap-2 mb-3">
-                    {% for t in psych_a.traits %}
+                <div class="flex flex-wrap gap-2 mb-4">
+                    {% for t in psych_a.traits[:3] %}
                     <span class="bg-white/60 dark:bg-white/10 border border-amber-200 dark:border-amber-700 rounded-full px-3 py-1 text-xs text-amber-800 dark:text-amber-200">{{ t }}</span>
                     {% endfor %}
                 </div>
                 {% endif %}
+                {% if stats_a.get('genre_radar') and stats_a.genre_radar.top_genre %}
+                <p class="text-amber-600 dark:text-amber-400 text-xs mb-2">Top Genre: <span class="font-semibold">{{ stats_a.genre_radar.top_genre }}</span></p>
+                {% endif %}
                 {% if psych_a.searching_for %}
-                <p class="text-amber-600 dark:text-amber-400 text-xs italic mt-2">Searching for: {{ psych_a.searching_for }}</p>
+                <p class="text-amber-700 dark:text-amber-300 text-sm italic mt-3 border-t border-amber-200 dark:border-amber-800 pt-3">Searching for: {{ psych_a.searching_for }}</p>
                 {% endif %}
             {% else %}
-            <p class="text-amber-600 dark:text-amber-400 text-sm italic">No psychological profile available yet.</p>
+            <p class="text-amber-600 dark:text-amber-400 text-sm italic">Profile not yet generated.</p>
             {% endif %}
         </div>
 
-        <!-- Reader B psychological snapshot -->
+        <!-- Reader B -->
         {% set psych_b = ai_b.psychological %}
         <div class="bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-950 dark:to-teal-950 border border-cyan-200 dark:border-cyan-800 rounded-xl p-6">
-            <h3 class="font-serif font-bold text-lg text-cyan-900 dark:text-cyan-100 mb-4">{{ profile_b.username }}</h3>
+            <div class="flex items-start justify-between mb-4 gap-3">
+                <h3 class="font-serif font-bold text-lg text-cyan-900 dark:text-cyan-100">{{ profile_b.username }}</h3>
+                {% if psych_b and psych_b.archetype %}
+                <span class="shrink-0 bg-cyan-800 dark:bg-cyan-700 text-cyan-100 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">{{ psych_b.archetype }}</span>
+                {% endif %}
+            </div>
             {% if psych_b %}
-                {% if psych_b.archetype %}
-                <div class="inline-block bg-white/70 dark:bg-white/10 border border-cyan-300 dark:border-cyan-700 rounded-lg px-4 py-2 mb-4">
-                    <p class="font-display font-bold text-cyan-800 dark:text-cyan-200">{{ psych_b.archetype }}</p>
-                </div>
-                {% endif %}
-                {% if psych_b.summary %}
-                <p class="text-cyan-800 dark:text-cyan-200 text-sm leading-relaxed mb-4">{{ psych_b.summary }}</p>
-                {% endif %}
                 {% if psych_b.traits %}
-                <div class="flex flex-wrap gap-2 mb-3">
-                    {% for t in psych_b.traits %}
+                <div class="flex flex-wrap gap-2 mb-4">
+                    {% for t in psych_b.traits[:3] %}
                     <span class="bg-white/60 dark:bg-white/10 border border-cyan-200 dark:border-cyan-700 rounded-full px-3 py-1 text-xs text-cyan-800 dark:text-cyan-200">{{ t }}</span>
                     {% endfor %}
                 </div>
                 {% endif %}
+                {% if stats_b.get('genre_radar') and stats_b.genre_radar.top_genre %}
+                <p class="text-cyan-600 dark:text-cyan-400 text-xs mb-2">Top Genre: <span class="font-semibold">{{ stats_b.genre_radar.top_genre }}</span></p>
+                {% endif %}
                 {% if psych_b.searching_for %}
-                <p class="text-cyan-600 dark:text-cyan-400 text-xs italic mt-2">Searching for: {{ psych_b.searching_for }}</p>
+                <p class="text-cyan-700 dark:text-cyan-300 text-sm italic mt-3 border-t border-cyan-200 dark:border-cyan-800 pt-3">Searching for: {{ psych_b.searching_for }}</p>
                 {% endif %}
             {% else %}
-            <p class="text-cyan-600 dark:text-cyan-400 text-sm italic">No psychological profile available yet.</p>
+            <p class="text-cyan-600 dark:text-cyan-400 text-sm italic">Profile not yet generated.</p>
             {% endif %}
         </div>
     </div>
-
-    <!-- Side-by-side Vibes -->
-    {% set vibe_a = ai_a.vibe_check %}
-    {% set vibe_b = ai_b.vibe_check %}
-    {% if vibe_a or vibe_b %}
-    <div class="card p-6">
-        <h3 class="font-display font-semibold text-lg mb-4 text-warm-700 dark:text-warm-200">Reading Vibes</h3>
-        <div class="grid grid-cols-2 gap-6 text-center">
-            <div>
-                {% if vibe_a and vibe_a.primary_aesthetic %}
-                <p class="text-xl font-bold text-amber-700 dark:text-amber-400">{{ vibe_a.primary_aesthetic }}</p>
-                {% if vibe_a.secondary_aesthetic %}
-                <p class="text-warm-400 text-sm mt-1">+ {{ vibe_a.secondary_aesthetic }}</p>
-                {% endif %}
-                {% if vibe_a.playlist_vibe %}
-                <p class="text-warm-500 dark:text-warm-400 text-xs mt-2 italic">{{ vibe_a.playlist_vibe }}</p>
-                {% endif %}
-                {% endif %}
-                <p class="text-warm-300 dark:text-warm-500 text-xs mt-2">{{ profile_a.username }}</p>
-            </div>
-            <div>
-                {% if vibe_b and vibe_b.primary_aesthetic %}
-                <p class="text-xl font-bold text-cyan-700 dark:text-cyan-400">{{ vibe_b.primary_aesthetic }}</p>
-                {% if vibe_b.secondary_aesthetic %}
-                <p class="text-warm-400 text-sm mt-1">+ {{ vibe_b.secondary_aesthetic }}</p>
-                {% endif %}
-                {% if vibe_b.playlist_vibe %}
-                <p class="text-warm-500 dark:text-warm-400 text-xs mt-2 italic">{{ vibe_b.playlist_vibe }}</p>
-                {% endif %}
-                {% endif %}
-                <p class="text-warm-300 dark:text-warm-500 text-xs mt-2">{{ profile_b.username }}</p>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Side-by-side Red & Green Flags -->
-    {% set flags_a = ai_a.red_green_flags %}
-    {% set flags_b = ai_b.red_green_flags %}
-    {% if flags_a or flags_b %}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        {% if flags_a %}
-        <div class="card p-6">
-            <h3 class="font-display font-semibold text-base mb-3 text-amber-700 dark:text-amber-400">{{ profile_a.username }}'s Flags</h3>
-            {% if flags_a.green_flags %}
-            <div class="mb-3">
-                <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-2">Green Flags</p>
-                <ul class="space-y-1">
-                    {% for f in flags_a.green_flags[:3] %}
-                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-emerald-500 shrink-0">✓</span>{{ f.flag if f.flag is defined else f }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-            {% if flags_a.red_flags %}
-            <div>
-                <p class="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide mb-2">Red Flags</p>
-                <ul class="space-y-1">
-                    {% for f in flags_a.red_flags[:3] %}
-                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-red-500 shrink-0">✗</span>{{ f.flag if f.flag is defined else f }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
-        {% if flags_b %}
-        <div class="card p-6">
-            <h3 class="font-display font-semibold text-base mb-3 text-cyan-700 dark:text-cyan-400">{{ profile_b.username }}'s Flags</h3>
-            {% if flags_b.green_flags %}
-            <div class="mb-3">
-                <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-2">Green Flags</p>
-                <ul class="space-y-1">
-                    {% for f in flags_b.green_flags[:3] %}
-                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-emerald-500 shrink-0">✓</span>{{ f.flag if f.flag is defined else f }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-            {% if flags_b.red_flags %}
-            <div>
-                <p class="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide mb-2">Red Flags</p>
-                <ul class="space-y-1">
-                    {% for f in flags_b.red_flags[:3] %}
-                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-red-500 shrink-0">✗</span>{{ f.flag if f.flag is defined else f }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-            {% endif %}
-        </div>
-        {% endif %}
-    </div>
-    {% endif %}
 </section>
 {% endif %}
 
@@ -368,6 +277,54 @@
     {% endif %}
 </section>
 
+<!-- ==================== HEAD-TO-HEAD SUPERLATIVES ==================== -->
+{% if dynamics.superlatives %}
+{% set sups = dynamics.superlatives %}
+<div class="section-divider"></div>
+<section id="section-superlatives" class="story-section">
+    <h2 class="section-heading text-3xl mb-2">Head-to-Head</h2>
+    <p class="text-warm-400 mb-8">Who wins in a straight-up matchup</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {% if sups.abandon_boring %}
+        <div class="card p-5 text-center">
+            <p class="text-warm-400 text-xs uppercase tracking-wide mb-3">Abandons the Boring</p>
+            <p class="text-lg font-bold {% if sups.abandon_boring.winner == profile_a.username %}text-amber-700 dark:text-amber-400{% else %}text-cyan-700 dark:text-cyan-400{% endif %}">{{ sups.abandon_boring.winner }}</p>
+            {% if sups.abandon_boring.evidence %}
+            <p class="text-warm-500 dark:text-warm-400 text-xs mt-2 leading-relaxed">{{ sups.abandon_boring.evidence }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if sups.booktok_susceptible %}
+        <div class="card p-5 text-center">
+            <p class="text-warm-400 text-xs uppercase tracking-wide mb-3">Most BookTok-able</p>
+            <p class="text-lg font-bold {% if sups.booktok_susceptible.winner == profile_a.username %}text-amber-700 dark:text-amber-400{% else %}text-cyan-700 dark:text-cyan-400{% endif %}">{{ sups.booktok_susceptible.winner }}</p>
+            {% if sups.booktok_susceptible.evidence %}
+            <p class="text-warm-500 dark:text-warm-400 text-xs mt-2 leading-relaxed">{{ sups.booktok_susceptible.evidence }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if sups.harsher_critic %}
+        <div class="card p-5 text-center">
+            <p class="text-warm-400 text-xs uppercase tracking-wide mb-3">Harsher Critic</p>
+            <p class="text-lg font-bold {% if sups.harsher_critic.winner == profile_a.username %}text-amber-700 dark:text-amber-400{% else %}text-cyan-700 dark:text-cyan-400{% endif %}">{{ sups.harsher_critic.winner }}</p>
+            {% if sups.harsher_critic.evidence %}
+            <p class="text-warm-500 dark:text-warm-400 text-xs mt-2 leading-relaxed">{{ sups.harsher_critic.evidence }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if sups.survive_dystopia %}
+        <div class="card p-5 text-center">
+            <p class="text-warm-400 text-xs uppercase tracking-wide mb-3">Survives the Dystopia</p>
+            <p class="text-lg font-bold {% if sups.survive_dystopia.winner == profile_a.username %}text-amber-700 dark:text-amber-400{% else %}text-cyan-700 dark:text-cyan-400{% endif %}">{{ sups.survive_dystopia.winner }}</p>
+            {% if sups.survive_dystopia.evidence %}
+            <p class="text-warm-500 dark:text-warm-400 text-xs mt-2 leading-relaxed">{{ sups.survive_dystopia.evidence }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
 <!-- ==================== THE SHARED SHELF ==================== -->
 {% if hard_stats.shared_shelf %}
 <div class="section-divider"></div>
@@ -465,37 +422,65 @@
 </section>
 {% endif %}
 
-<!-- ==================== AI DYNAMICS ==================== -->
-{% if dynamics.whos_main_character or dynamics.desert_island or dynamics.what_they_argue_about or dynamics.their_book_club or dynamics.alter_egos or dynamics.reading_dynamic %}
+<!-- ==================== THE DYNAMIC ==================== -->
+{% if dynamics.what_they_argue_about or dynamics.what_each_brings or dynamics.one_book_that_changes_everything or dynamics.their_book_club or dynamics.alter_egos or dynamics.reading_dynamic %}
 <div class="section-divider"></div>
 <section id="section-dynamics" class="story-section">
     <h2 class="section-heading text-3xl mb-8">The Dynamic</h2>
 
-    {% if dynamics.whos_main_character %}
-    {% set mc = dynamics.whos_main_character %}
-    <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 border border-amber-200 dark:border-amber-800 rounded-xl p-8 mb-8">
-        <h3 class="font-serif font-bold text-xl text-amber-900 dark:text-amber-100 mb-3">Who's the Main Character?</h3>
-        <p class="text-amber-800 dark:text-amber-200 text-lg">
-            <strong>{{ mc.main_character }}</strong> is the protagonist.
-            <strong>{{ mc.sidekick }}</strong> is the sidekick.
-        </p>
-        {% if mc.explanation %}
-        <p class="text-amber-700 dark:text-amber-300 mt-3">{{ mc.explanation }}</p>
-        {% endif %}
-    </div>
-    {% endif %}
-
-    {% if dynamics.desert_island %}
-    <div class="card p-8 mb-8">
-        <h3 class="font-serif font-bold text-xl text-warm-700 dark:text-warm-200 mb-3">The Desert Island Scenario</h3>
-        <p class="text-warm-600 dark:text-warm-300 whitespace-pre-line leading-relaxed">{{ dynamics.desert_island }}</p>
-    </div>
-    {% endif %}
-
+    <!-- Autopsy of a Disagreement (was "What They Argue About") -->
     {% if dynamics.what_they_argue_about %}
     <div class="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950 dark:to-rose-950 border border-red-200 dark:border-red-800 rounded-xl p-8 mb-8">
-        <h3 class="font-serif font-bold text-xl text-red-900 dark:text-red-100 mb-3">What They Argue About</h3>
-        <p class="text-red-800 dark:text-red-200 text-lg">{{ dynamics.what_they_argue_about }}</p>
+        <h3 class="font-serif font-bold text-xl text-red-900 dark:text-red-100 mb-3">Autopsy of a Disagreement</h3>
+        <p class="text-red-800 dark:text-red-200 leading-relaxed">{{ dynamics.what_they_argue_about }}</p>
+    </div>
+    {% endif %}
+
+    <!-- AI Extras -->
+    {% if dynamics.what_each_brings %}
+    {% set web = dynamics.what_each_brings %}
+    <div class="card p-8 mb-8">
+        <h3 class="font-serif font-bold text-xl text-warm-700 dark:text-warm-200 mb-6">What Each Brings to the Other</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% if web.a_brings_to_b %}
+            <div class="bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 rounded-lg p-5">
+                <p class="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-2">{{ profile_a.username }} brings to {{ profile_b.username }}</p>
+                <p class="text-warm-700 dark:text-warm-300 text-sm leading-relaxed">{{ web.a_brings_to_b }}</p>
+            </div>
+            {% endif %}
+            {% if web.b_brings_to_a %}
+            <div class="bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200 dark:border-cyan-800 rounded-lg p-5">
+                <p class="text-xs font-medium text-cyan-600 dark:text-cyan-400 uppercase tracking-wide mb-2">{{ profile_b.username }} brings to {{ profile_a.username }}</p>
+                <p class="text-warm-700 dark:text-warm-300 text-sm leading-relaxed">{{ web.b_brings_to_a }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if dynamics.one_book_that_changes_everything %}
+    {% set obce = dynamics.one_book_that_changes_everything %}
+    <div class="card p-8 mb-8">
+        <h3 class="font-serif font-bold text-xl text-warm-700 dark:text-warm-200 mb-2">The One Book That Changes Everything</h3>
+        <p class="text-warm-400 text-sm mb-6">One read from each shelf that would shift how they see the other</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% if obce.for_a %}
+            <div class="bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 rounded-lg p-5">
+                <p class="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-3">{{ profile_a.username }} should read:</p>
+                <p class="font-display font-semibold text-warm-800 dark:text-warm-100">{{ obce.for_a.title }}</p>
+                <p class="text-warm-500 dark:text-warm-400 text-sm mb-3">by {{ obce.for_a.author }}</p>
+                <p class="text-warm-700 dark:text-warm-300 text-sm leading-relaxed">{{ obce.for_a.why }}</p>
+            </div>
+            {% endif %}
+            {% if obce.for_b %}
+            <div class="bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200 dark:border-cyan-800 rounded-lg p-5">
+                <p class="text-xs font-medium text-cyan-600 dark:text-cyan-400 uppercase tracking-wide mb-3">{{ profile_b.username }} should read:</p>
+                <p class="font-display font-semibold text-warm-800 dark:text-warm-100">{{ obce.for_b.title }}</p>
+                <p class="text-warm-500 dark:text-warm-400 text-sm mb-3">by {{ obce.for_b.author }}</p>
+                <p class="text-warm-700 dark:text-warm-300 text-sm leading-relaxed">{{ obce.for_b.why }}</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
     {% endif %}
 
@@ -535,59 +520,172 @@
 </section>
 {% endif %}
 
-<!-- ==================== RECOMMENDATIONS ==================== -->
-{% if recs.bridge_books or recs.book_swap %}
+<!-- ==================== ESCAPE ROOM ==================== -->
+{% if dynamics.escape_room %}
 <div class="section-divider"></div>
-<section id="section-recs" class="story-section">
-    <h2 class="section-heading text-3xl mb-8">Book Recommendations</h2>
+<section class="story-section">
+    <div class="bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-950 dark:to-indigo-950 border border-violet-200 dark:border-violet-800 rounded-xl p-8">
+        <p class="text-sm text-violet-500 dark:text-violet-400 uppercase tracking-widest font-medium mb-2">The Scenario</p>
+        <h3 class="font-serif font-bold text-2xl text-violet-900 dark:text-violet-100 mb-4">Escape Room</h3>
+        <p class="text-violet-800 dark:text-violet-200 leading-relaxed">{{ dynamics.escape_room }}</p>
+    </div>
+</section>
+{% endif %}
 
-    {% if recs.bridge_books %}
-    <div class="mb-10">
-        <h3 class="font-serif font-semibold text-xl text-warm-700 dark:text-warm-200 mb-1">The Bridge Books</h3>
-        <p class="text-warm-400 text-sm mb-4">Books neither has read that perfectly intersect both tastes</p>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {% for book in recs.bridge_books %}
-            <div class="card card-tilt accent-left-emerald p-5">
-                <p class="font-display font-semibold text-warm-800 dark:text-warm-100">{{ book.title }}</p>
-                <p class="text-warm-500 dark:text-warm-400 text-sm">by {{ book.author }}</p>
-                <p class="text-warm-600 dark:text-warm-300 text-sm mt-2">{{ book.why }}</p>
+<!-- ==================== THE COMPROMISE ==================== -->
+{% if recs.the_compromise or recs.book_swap %}
+<div class="section-divider"></div>
+<section class="story-section">
+    <h2 class="section-heading text-3xl mb-2">The Compromise</h2>
+    <p class="text-warm-400 mb-8">One pick from each shelf the other actually might love</p>
+
+    {% if recs.the_compromise %}
+    {% set comp_recs = recs.the_compromise %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% if comp_recs.for_a %}
+        <div class="card accent-left-amber p-6">
+            <p class="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-3">{{ profile_a.username }} should try:</p>
+            <p class="font-display font-semibold text-warm-800 dark:text-warm-100">{{ comp_recs.for_a.title }}</p>
+            <p class="text-warm-500 dark:text-warm-400 text-sm mb-2">by {{ comp_recs.for_a.author }}</p>
+            {% if comp_recs.for_a.from_shelf %}
+            <span class="inline-block bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-xs px-2 py-0.5 rounded-full mb-3">from {{ profile_b.username }}'s {{ comp_recs.for_a.from_shelf }}-star shelf</span>
+            {% endif %}
+            <p class="text-warm-600 dark:text-warm-300 text-sm leading-relaxed">{{ comp_recs.for_a.why }}</p>
+        </div>
+        {% endif %}
+        {% if comp_recs.for_b %}
+        <div class="card accent-left-cyan p-6">
+            <p class="text-xs font-medium text-cyan-600 dark:text-cyan-400 uppercase tracking-wide mb-3">{{ profile_b.username }} should try:</p>
+            <p class="font-display font-semibold text-warm-800 dark:text-warm-100">{{ comp_recs.for_b.title }}</p>
+            <p class="text-warm-500 dark:text-warm-400 text-sm mb-2">by {{ comp_recs.for_b.author }}</p>
+            {% if comp_recs.for_b.from_shelf %}
+            <span class="inline-block bg-cyan-100 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300 text-xs px-2 py-0.5 rounded-full mb-3">from {{ profile_a.username }}'s {{ comp_recs.for_b.from_shelf }}-star shelf</span>
+            {% endif %}
+            <p class="text-warm-600 dark:text-warm-300 text-sm leading-relaxed">{{ comp_recs.for_b.why }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    {% elif recs.book_swap %}
+    <!-- Backwards-compat fallback: old book_swap data -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% if recs.book_swap.a_should_read %}
+        <div>
+            <h4 class="font-display font-medium text-amber-700 dark:text-amber-400 mb-3">{{ profile_a.username }} should read:</h4>
+            {% for book in recs.book_swap.a_should_read %}
+            <div class="card card-tilt accent-left-amber p-4 mb-3">
+                <p class="font-semibold text-warm-800 dark:text-warm-100 text-sm">{{ book.title }}</p>
+                <p class="text-warm-500 dark:text-warm-400 text-xs">by {{ book.author }}</p>
+                <p class="text-warm-600 dark:text-warm-300 text-xs mt-1">{{ book.why }}</p>
             </div>
             {% endfor %}
         </div>
-    </div>
-    {% endif %}
-
-    {% if recs.book_swap %}
-    <div>
-        <h3 class="font-serif font-semibold text-xl text-warm-700 dark:text-warm-200 mb-4">The Book Swap</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% if recs.book_swap.a_should_read %}
-            <div>
-                <h4 class="font-display font-medium text-amber-700 dark:text-amber-400 mb-3">{{ profile_a.username }} should read:</h4>
-                {% for book in recs.book_swap.a_should_read %}
-                <div class="card card-tilt accent-left-amber p-4 mb-3">
-                    <p class="font-semibold text-warm-800 dark:text-warm-100 text-sm">{{ book.title }}</p>
-                    <p class="text-warm-500 dark:text-warm-400 text-xs">by {{ book.author }}</p>
-                    <p class="text-warm-600 dark:text-warm-300 text-xs mt-1">{{ book.why }}</p>
-                </div>
-                {% endfor %}
+        {% endif %}
+        {% if recs.book_swap.b_should_read %}
+        <div>
+            <h4 class="font-display font-medium text-cyan-700 dark:text-cyan-400 mb-3">{{ profile_b.username }} should read:</h4>
+            {% for book in recs.book_swap.b_should_read %}
+            <div class="card card-tilt accent-left-cyan p-4 mb-3">
+                <p class="font-semibold text-warm-800 dark:text-warm-100 text-sm">{{ book.title }}</p>
+                <p class="text-warm-500 dark:text-warm-400 text-xs">by {{ book.author }}</p>
+                <p class="text-warm-600 dark:text-warm-300 text-xs mt-1">{{ book.why }}</p>
             </div>
-            {% endif %}
-            {% if recs.book_swap.b_should_read %}
-            <div>
-                <h4 class="font-display font-medium text-cyan-700 dark:text-cyan-400 mb-3">{{ profile_b.username }} should read:</h4>
-                {% for book in recs.book_swap.b_should_read %}
-                <div class="card card-tilt accent-left-cyan p-4 mb-3">
-                    <p class="font-semibold text-warm-800 dark:text-warm-100 text-sm">{{ book.title }}</p>
-                    <p class="text-warm-500 dark:text-warm-400 text-xs">by {{ book.author }}</p>
-                    <p class="text-warm-600 dark:text-warm-300 text-xs mt-1">{{ book.why }}</p>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+            {% endfor %}
         </div>
+        {% endif %}
     </div>
     {% endif %}
+</section>
+{% endif %}
+
+<!-- ==================== THE DEALBREAKER ==================== -->
+{% if dynamics.dealbreaker %}
+<div class="section-divider"></div>
+<section class="story-section">
+    <div class="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950 dark:to-rose-950 border-2 border-red-300 dark:border-red-700 rounded-xl p-8">
+        <p class="text-sm text-red-500 dark:text-red-400 uppercase tracking-widest font-medium mb-2">The Scenario</p>
+        <h3 class="font-serif font-bold text-2xl text-red-900 dark:text-red-100 mb-4">The Dealbreaker</h3>
+        <p class="text-red-800 dark:text-red-200 leading-relaxed">{{ dynamics.dealbreaker }}</p>
+    </div>
+</section>
+{% endif %}
+
+<!-- ==================== THE DEEP CUTS ==================== -->
+{% if dynamics.cognitive_diet or dynamics.five_star_philosophy %}
+<div class="section-divider"></div>
+<section id="section-deep" class="story-section">
+    <h2 class="section-heading text-3xl mb-2">Deep Cuts</h2>
+    <p class="text-warm-400 mb-8">What their reading habits reveal about how they think</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {% if dynamics.cognitive_diet %}
+        {% set cd = dynamics.cognitive_diet %}
+        <div class="card p-6">
+            <h3 class="font-serif font-semibold text-lg text-warm-700 dark:text-warm-200 mb-4">Cognitive Diet</h3>
+            <div class="space-y-4">
+                {% if cd.user_a %}
+                <div class="bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                    <p class="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-1">{{ profile_a.username }}</p>
+                    {% if cd.user_a.axes %}<p class="font-semibold text-amber-800 dark:text-amber-200 text-sm mb-1">{{ cd.user_a.axes }}</p>{% endif %}
+                    {% if cd.user_a.description %}<p class="text-warm-600 dark:text-warm-300 text-sm leading-relaxed">{{ cd.user_a.description }}</p>{% endif %}
+                </div>
+                {% endif %}
+                {% if cd.user_b %}
+                <div class="bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200 dark:border-cyan-800 rounded-lg p-4">
+                    <p class="text-xs font-medium text-cyan-600 dark:text-cyan-400 uppercase tracking-wide mb-1">{{ profile_b.username }}</p>
+                    {% if cd.user_b.axes %}<p class="font-semibold text-cyan-800 dark:text-cyan-200 text-sm mb-1">{{ cd.user_b.axes }}</p>{% endif %}
+                    {% if cd.user_b.description %}<p class="text-warm-600 dark:text-warm-300 text-sm leading-relaxed">{{ cd.user_b.description }}</p>{% endif %}
+                </div>
+                {% endif %}
+                {% if cd.synthesis %}
+                <p class="text-warm-500 dark:text-warm-400 text-sm italic border-t border-warm-200 dark:border-warm-700 pt-3">{{ cd.synthesis }}</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if dynamics.five_star_philosophy %}
+        {% set fsp = dynamics.five_star_philosophy %}
+        <div class="card p-6">
+            <h3 class="font-serif font-semibold text-lg text-warm-700 dark:text-warm-200 mb-4">Philosophy of a 5-Star</h3>
+            <div class="space-y-4">
+                {% if fsp.user_a %}
+                <div class="bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                    <p class="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-1">{{ profile_a.username }}</p>
+                    {% if fsp.user_a.rule %}<p class="font-semibold text-amber-800 dark:text-amber-200 text-sm mb-1">{{ fsp.user_a.rule }}</p>{% endif %}
+                    {% if fsp.user_a.description %}<p class="text-warm-600 dark:text-warm-300 text-sm leading-relaxed">{{ fsp.user_a.description }}</p>{% endif %}
+                </div>
+                {% endif %}
+                {% if fsp.user_b %}
+                <div class="bg-cyan-50 dark:bg-cyan-950/50 border border-cyan-200 dark:border-cyan-800 rounded-lg p-4">
+                    <p class="text-xs font-medium text-cyan-600 dark:text-cyan-400 uppercase tracking-wide mb-1">{{ profile_b.username }}</p>
+                    {% if fsp.user_b.rule %}<p class="font-semibold text-cyan-800 dark:text-cyan-200 text-sm mb-1">{{ fsp.user_b.rule }}</p>{% endif %}
+                    {% if fsp.user_b.description %}<p class="text-warm-600 dark:text-warm-300 text-sm leading-relaxed">{{ fsp.user_b.description }}</p>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+{% endif %}
+
+<!-- ==================== BRIDGE BOOKS ==================== -->
+{% if recs.bridge_books %}
+<div class="section-divider"></div>
+<section id="section-recs" class="story-section">
+    <h2 class="section-heading text-3xl mb-2">The Bridge Books</h2>
+    <p class="text-warm-400 text-sm mb-6">Books neither has read that perfectly intersect both tastes</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {% for book in recs.bridge_books %}
+        <div class="card card-tilt accent-left-emerald p-5">
+            <p class="font-display font-semibold text-warm-800 dark:text-warm-100">{{ book.title }}</p>
+            <p class="text-warm-500 dark:text-warm-400 text-sm">by {{ book.author }}</p>
+            <p class="text-warm-600 dark:text-warm-300 text-sm mt-2">{{ book.why }}</p>
+        </div>
+        {% endfor %}
+    </div>
 </section>
 {% endif %}
 {% endblock %}

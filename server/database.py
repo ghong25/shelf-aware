@@ -48,6 +48,23 @@ async def get_recent_profiles(limit: int = 12) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+async def get_recent_comparisons(limit: int = 6) -> list[dict]:
+    rows = await get_pool().fetch(
+        """SELECT
+               pa.goodreads_id AS id_a, pa.username AS username_a,
+               pb.goodreads_id AS id_b, pb.username AS username_b,
+               c.comparison_json->'dynamics'->>'compatibility_score' AS compatibility_score,
+               c.comparison_json->'dynamics'->>'dynamic_trope' AS dynamic_trope,
+               c.created_at
+           FROM comparisons c
+           JOIN profiles pa ON c.profile_a_id = pa.id
+           JOIN profiles pb ON c.profile_b_id = pb.id
+           ORDER BY c.created_at DESC LIMIT $1""",
+        limit,
+    )
+    return [dict(r) for r in rows]
+
+
 async def get_comparison(id1: str, id2: str) -> dict | None:
     row = await get_pool().fetchrow(
         """SELECT c.*, pa.goodreads_id AS gid_a, pb.goodreads_id AS gid_b
