@@ -23,19 +23,19 @@
                 <p class="text-2xl font-bold text-warm-800 dark:text-warm-100 count-up" data-count-target="{{ profile.book_count }}">{{ profile.book_count }}</p>
                 <p class="text-warm-400 text-sm">Books Read</p>
             </div>
-            {% if stats.get('hater_hype') %}
+            {% if stats.get('hater_hype') and stats.hater_hype.total_rated %}
             <div>
                 <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats.hater_hype.label }}</p>
                 <p class="text-warm-400 text-sm">Rating Style</p>
             </div>
             {% endif %}
-            {% if stats.get('attention_span') %}
+            {% if stats.get('attention_span') and stats.attention_span.avg_pages %}
             <div>
                 <p class="text-2xl font-bold text-warm-800 dark:text-warm-100 count-up" data-count-target="{{ stats.attention_span.avg_pages|int }}">{{ stats.attention_span.avg_pages|int }}</p>
                 <p class="text-warm-400 text-sm">Avg Pages</p>
             </div>
             {% endif %}
-            {% if stats.get('genre_radar') %}
+            {% if stats.get('genre_radar') and stats.genre_radar.top_genre %}
             <div>
                 <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats.genre_radar.top_genre }}</p>
                 <p class="text-warm-400 text-sm">Top Genre</p>
@@ -110,19 +110,19 @@
                 <p class="metric-value count-up" data-count-target="{{ profile.book_count }}">{{ profile.book_count }}</p>
                 <p class="metric-label">Books Read</p>
             </div>
-            {% if stats.get('hater_hype') %}
+            {% if stats.get('hater_hype') and stats.hater_hype.total_rated %}
             <div class="metric-card">
                 <p class="metric-value">{{ stats.hater_hype.label }}</p>
                 <p class="metric-label">Rating Style</p>
             </div>
             {% endif %}
-            {% if stats.get('attention_span') %}
+            {% if stats.get('attention_span') and stats.attention_span.avg_pages %}
             <div class="metric-card">
                 <p class="metric-value count-up" data-count-target="{{ stats.attention_span.avg_pages|int }}">{{ stats.attention_span.avg_pages|int }}p</p>
                 <p class="metric-label">Avg Length</p>
             </div>
             {% endif %}
-            {% if stats.get('genre_radar') %}
+            {% if stats.get('genre_radar') and stats.genre_radar.top_genre %}
             <div class="metric-card">
                 <p class="metric-value text-lg">{{ stats.genre_radar.top_genre }}</p>
                 <p class="metric-label">Top Genre</p>
@@ -132,7 +132,7 @@
 
         <!-- Charts: Rating Distribution + Hater vs Hype -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% if stats.get('rating_distribution') %}
+            {% if stats.get('rating_distribution') and stats.rating_distribution.total_rated %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Rating Distribution</h3>
                 <p class="text-warm-400 text-xs mb-4">How you rate the books you read</p>
@@ -140,7 +140,7 @@
             </div>
             {% endif %}
 
-            {% if stats.get('hater_hype') %}
+            {% if stats.get('hater_hype') and stats.hater_hype.total_rated %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Hater vs Hype <span class="text-sm font-body text-warm-400">({{ stats.hater_hype.label }})</span></h3>
                 <p class="text-warm-400 text-xs mb-3">How far your ratings diverge from the crowd</p>
@@ -161,7 +161,7 @@
         <h2 class="section-heading text-3xl mb-8">Your Reading Life</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% if stats.get('genre_radar') %}
+            {% if stats.get('genre_radar') and stats.genre_radar.top_genre %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Genre Radar</h3>
                 <p class="text-warm-400 text-xs mb-4">Your reading spread across genres</p>
@@ -169,7 +169,7 @@
             </div>
             {% endif %}
 
-            {% if stats.get('reading_eras') %}
+            {% if stats.get('reading_eras') and stats.reading_eras.dominant_era %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Reading Eras</h3>
                 <p class="text-warm-400 text-xs mb-4">Which decades you gravitate toward</p>
@@ -177,7 +177,7 @@
             </div>
             {% endif %}
 
-            {% if stats.get('attention_span') %}
+            {% if stats.get('attention_span') and stats.attention_span.avg_pages %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Attention Span</h3>
                 <p class="text-warm-400 text-xs mb-4">Page count distribution of your books</p>
@@ -185,7 +185,7 @@
             </div>
             {% endif %}
 
-            {% if stats.get('reading_pace') %}
+            {% if stats.get('reading_pace') and stats.reading_pace.total_years %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Reading Pace</h3>
                 <p class="text-warm-400 text-xs mb-4">Books finished over time</p>
@@ -193,7 +193,7 @@
             </div>
             {% endif %}
 
-            {% if stats.get('author_loyalty') %}
+            {% if stats.get('author_loyalty') and stats.author_loyalty.repeat_author_count %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Author Loyalty</h3>
                 <p class="text-warm-400 text-xs mb-4">Authors you keep coming back to</p>
@@ -201,7 +201,7 @@
             </div>
             {% endif %}
 
-            {% if stats.get('reading_heatmap') %}
+            {% if stats.get('reading_heatmap') and stats.reading_heatmap.total_days_reading %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Reading Heatmap</h3>
                 <p class="text-warm-400 text-xs mb-4">Your reading activity over the past year</p>
@@ -215,12 +215,13 @@
 <!-- ==================== TAB: AI INSIGHTS ==================== -->
 {% if has_ai %}
 <div class="tab-panel" id="tab-ai-insights" data-tab-panel="ai-insights" hidden>
+    <div class="toc-layout">
     <section class="story-section">
         <h2 class="section-heading text-3xl mb-8">Who You Are</h2>
 
         <!-- Between the Lines (Deep Profile) -->
         {% if ai.get('deep_profile') %}
-        <div class="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950 dark:to-cyan-950 border border-teal-200 dark:border-teal-800 rounded-xl p-8 mb-8">
+        <div id="ai-between-lines" data-toc-label="Between the Lines" class="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950 dark:to-cyan-950 border border-teal-200 dark:border-teal-800 rounded-xl p-8 mb-8">
             <h3 class="font-serif font-bold text-2xl text-teal-900 dark:text-teal-100 mb-1">Between the Lines</h3>
             <p class="text-teal-600 dark:text-teal-400 italic text-sm mb-6">A detective's reading of your reading</p>
 
@@ -270,7 +271,7 @@
 
         <!-- Psychological Profile -->
         {% if ai.get('psychological') %}
-        <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 border border-amber-200 dark:border-amber-800 rounded-xl p-8 mb-8">
+        <div id="ai-psychological" data-toc-label="Psychological Profile" class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 border border-amber-200 dark:border-amber-800 rounded-xl p-8 mb-8">
             <h3 class="font-serif font-bold text-2xl text-amber-900 dark:text-amber-100 mb-4">Psychological Profile</h3>
             {% if ai.psychological.archetype %}
             <div class="bg-white/70 dark:bg-white/10 border border-amber-300 dark:border-amber-700 rounded-lg px-5 py-3 inline-block mb-6">
@@ -314,7 +315,7 @@
 
         <!-- Vibe Check -->
         {% if ai.get('vibe_check') %}
-        <div class="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950 dark:to-purple-950 border border-violet-200 dark:border-violet-800 rounded-xl p-8 mb-8">
+        <div id="ai-vibe-check" data-toc-label="Vibe Check" class="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950 dark:to-purple-950 border border-violet-200 dark:border-violet-800 rounded-xl p-8 mb-8">
             <h3 class="font-serif font-bold text-2xl text-violet-900 dark:text-violet-100 mb-4">Vibe Check</h3>
             {% if ai.vibe_check.primary_aesthetic %}
             <div class="bg-white/70 dark:bg-white/10 border border-violet-300 dark:border-violet-700 rounded-lg px-5 py-3 inline-block mb-4">
@@ -344,7 +345,7 @@
 
         <!-- Red & Green Flags -->
         {% if ai.get('red_green_flags') %}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div id="ai-flags" data-toc-label="Red & Green Flags" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {% if ai.red_green_flags.green_flags %}
             <div class="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950 dark:to-green-950 border border-emerald-200 dark:border-emerald-800 rounded-xl p-6">
                 <h3 class="font-serif font-bold text-xl text-emerald-900 dark:text-emerald-100 mb-4">Green Flags</h3>
@@ -372,7 +373,7 @@
 
         <!-- Roast -->
         {% if ai.get('roast') %}
-        <div id="roast-card" class="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950 border border-orange-200 dark:border-orange-800 rounded-xl p-8 mb-8">
+        <div id="roast-card" data-toc-label="Roast My Shelf" class="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950 dark:to-red-950 border border-orange-200 dark:border-orange-800 rounded-xl p-8 mb-8">
             <h3 class="font-serif font-bold text-2xl text-orange-900 dark:text-orange-100 mb-4">Roast My Shelf</h3>
             {% if ai.roast.roast %}
             <div class="bg-white/70 dark:bg-white/10 border border-orange-200 dark:border-orange-800 rounded-lg p-5 mb-5 space-y-3">
@@ -409,7 +410,7 @@
 
         <!-- Blind Spots -->
         {% if ai.get('blind_spots') %}
-        <div class="bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950 dark:to-sky-950 border border-blue-200 dark:border-blue-800 rounded-xl p-8 mb-8">
+        <div id="ai-blind-spots" data-toc-label="Blind Spots" class="bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950 dark:to-sky-950 border border-blue-200 dark:border-blue-800 rounded-xl p-8 mb-8">
             <h3 class="font-serif font-bold text-2xl text-blue-900 dark:text-blue-100 mb-4">Blind Spots</h3>
             {% if ai.blind_spots.gaps %}
             {% for gap in ai.blind_spots.gaps %}
@@ -430,7 +431,7 @@
 
         <!-- Reading Evolution -->
         {% if ai.get('reading_evolution') %}
-        <div class="bg-gradient-to-br from-warm-50 to-cream-100 dark:from-warm-800 dark:to-warm-900 border border-warm-200 dark:border-warm-700 rounded-xl p-8 mb-8">
+        <div id="ai-evolution" data-toc-label="Reading Evolution" class="bg-gradient-to-br from-warm-50 to-cream-100 dark:from-warm-800 dark:to-warm-900 border border-warm-200 dark:border-warm-700 rounded-xl p-8 mb-8">
             <h3 class="font-serif font-bold text-2xl text-warm-800 dark:text-warm-100 mb-6">Reading Evolution</h3>
             {% if ai.reading_evolution.eras %}
             <div class="space-y-6">
@@ -458,18 +459,21 @@
         </div>
         {% endif %}
     </section>
+    <aside class="tab-toc" aria-label="On this page"></aside>
+    </div>
 </div>
 {% endif %}
 
 <!-- ==================== TAB: RECOMMENDATIONS ==================== -->
 {% if has_recs %}
 <div class="tab-panel" id="tab-recommendations" data-tab-panel="recommendations" hidden>
+    <div class="toc-layout">
     <section class="story-section">
         <h2 class="section-heading text-3xl mb-8">Your Next Reads</h2>
 
         <!-- Top 10 Picks -->
         {% if ai.recommendations.top_10 %}
-        <div class="mb-10">
+        <div id="recs-top10" data-toc-label="Top 10 Picks" class="mb-10">
             <h3 class="font-serif font-semibold text-xl text-warm-700 dark:text-warm-200 mb-4">Top 10 Picks For You</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {% for rec in ai.recommendations.top_10 %}
@@ -485,7 +489,7 @@
 
         <!-- Deep Cuts -->
         {% if ai.recommendations.deep_cuts %}
-        <div class="mb-10">
+        <div id="recs-deep-cuts" data-toc-label="Deep Cuts" class="mb-10">
             <h3 class="font-serif font-semibold text-xl text-warm-700 dark:text-warm-200 mb-1">Deep Cuts</h3>
             <p class="text-warm-400 text-sm mb-4">Lesser-known gems you'd love</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -502,7 +506,7 @@
 
         <!-- Next Favorite Author -->
         {% if ai.recommendations.next_favorite_author %}
-        <div class="mb-10">
+        <div id="recs-next-author" data-toc-label="Next Fav Author" class="mb-10">
             <h3 class="font-serif font-semibold text-xl text-warm-700 dark:text-warm-200 mb-4">Your Next Favorite Author</h3>
             <div class="card card-tilt accent-left-emerald p-6">
                 <p class="font-display font-bold text-xl text-warm-800 dark:text-warm-100">{{ ai.recommendations.next_favorite_author.name }}</p>
@@ -514,7 +518,7 @@
 
         <!-- Wildcard -->
         {% if ai.recommendations.wildcard %}
-        <div class="mb-8">
+        <div id="recs-wildcard" data-toc-label="Wildcard Pick" class="mb-8">
             <h3 class="font-serif font-semibold text-xl text-warm-700 dark:text-warm-200 mb-4">Wildcard Pick</h3>
             <div class="card card-tilt accent-left-rose p-6 bg-gradient-to-r from-rose-50/50 dark:from-rose-950/50 to-transparent">
                 <p class="font-display font-bold text-warm-800 dark:text-warm-100">{{ ai.recommendations.wildcard.title }}</p>
@@ -524,6 +528,8 @@
         </div>
         {% endif %}
     </section>
+    <aside class="tab-toc" aria-label="On this page"></aside>
+    </div>
 </div>
 {% endif %}
 {% endblock %}
@@ -534,6 +540,50 @@
 
     // Track which tabs have had their charts rendered
     const chartRendered = new Set();
+
+    // ===== Table of Contents =====
+    let tocScrollHandler = null;
+
+    function buildToc(tabName) {
+        const panel = document.getElementById('tab-' + tabName);
+        if (!panel) return;
+        const toc = panel.querySelector('.tab-toc');
+        if (!toc) return;
+
+        const sections = Array.from(panel.querySelectorAll('[data-toc-label]'));
+        if (sections.length < 2) { toc.innerHTML = ''; return; }
+
+        let html = '<p class="toc-heading">On this page</p>';
+        sections.forEach(s => {
+            html += `<a href="#${s.id}" class="toc-link" data-toc-target="${s.id}">${s.dataset.tocLabel}</a>`;
+        });
+        toc.innerHTML = html;
+
+        toc.querySelectorAll('.toc-link').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                document.getElementById(link.dataset.tocTarget)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Remove previous scroll handler before attaching a new one
+        if (tocScrollHandler) window.removeEventListener('scroll', tocScrollHandler);
+
+        function updateActive() {
+            const OFFSET = 90;
+            let activeId = sections[0]?.id;
+            for (const s of sections) {
+                if (s.getBoundingClientRect().top <= OFFSET) activeId = s.id;
+            }
+            toc.querySelectorAll('.toc-link').forEach(l => {
+                l.classList.toggle('active', l.dataset.tocTarget === activeId);
+            });
+        }
+
+        tocScrollHandler = updateActive;
+        window.addEventListener('scroll', updateActive, { passive: true });
+        updateActive();
+    }
 
     // Tab switching
     function switchTab(tabName) {
@@ -571,6 +621,9 @@
         if (activeBtn) {
             activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
+
+        // Build TOC for this tab (no-op if no .tab-toc inside)
+        buildToc(tabName);
     }
 
     // Tab bar click handler

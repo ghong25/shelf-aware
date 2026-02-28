@@ -250,7 +250,10 @@ function renderHeatmap(containerId, dailyCounts) {
         const weekCells = [];
         const weekStart = new Date(current);
         for (let day = 0; day < 7; day++) {
-            const dateStr = current.toISOString().slice(0, 10);
+            const y = current.getFullYear();
+            const mo = String(current.getMonth() + 1).padStart(2, '0');
+            const dy = String(current.getDate()).padStart(2, '0');
+            const dateStr = `${y}-${mo}-${dy}`;
             const count = countMap[dateStr] || 0;
             let level = 0;
             if (count > 0) {
@@ -276,16 +279,14 @@ function renderHeatmap(containerId, dailyCounts) {
     }
     html += '</div>';
 
-    html += '<div style="display:flex;gap:2px;margin-top:4px;">';
+    html += '<div style="position:relative;height:16px;margin-top:4px;">';
     let lastMonth = -1;
-    for (const week of weekColumns) {
-        const m = week.start.getMonth();
-        const colWidth = '12px';
+    for (let wi = 0; wi < weekColumns.length; wi++) {
+        const m = weekColumns[wi].start.getMonth();
         if (m !== lastMonth) {
-            html += `<div style="width:${colWidth};font-size:10px;color:#9C8E7C;white-space:nowrap;">${months[m]}</div>`;
+            const xPos = wi * 14; // 12px cell + 2px gap
+            html += `<span style="position:absolute;left:${xPos}px;font-size:10px;color:#9C8E7C;white-space:nowrap;">${months[m]}</span>`;
             lastMonth = m;
-        } else {
-            html += `<div style="width:${colWidth};"></div>`;
         }
     }
     html += '</div>';
