@@ -31,7 +31,7 @@
         {% if dynamics.compatibility_score is defined %}
         <a href="#section-compat" class="section-nav-item active" data-section="section-compat">Compatibility</a>
         {% endif %}
-        {% if profile_a.ai_psychological or profile_b.ai_psychological %}
+        {% if ai_a.psychological or ai_b.psychological %}
         <a href="#section-meet" class="section-nav-item" data-section="section-meet">Meet the Readers</a>
         {% endif %}
         <a href="#section-stats" class="section-nav-item" data-section="section-stats">Stats</a>
@@ -84,7 +84,7 @@
 <div class="section-divider"></div>
 
 <!-- ==================== MEET THE READERS ==================== -->
-{% if profile_a.ai_psychological or profile_b.ai_psychological %}
+{% if ai_a.psychological or ai_b.psychological %}
 <section id="section-meet" class="story-section">
     <h2 class="section-heading text-3xl mb-2">Meet the Readers</h2>
     <p class="text-warm-400 mb-8">What their shelves say about who they are</p>
@@ -92,7 +92,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
         <!-- Reader A psychological snapshot -->
-        {% set psych_a = profile_a.ai_psychological %}
+        {% set psych_a = ai_a.psychological %}
         <div class="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 border border-amber-200 dark:border-amber-800 rounded-xl p-6">
             <h3 class="font-serif font-bold text-lg text-amber-900 dark:text-amber-100 mb-4">{{ profile_a.username }}</h3>
             {% if psych_a %}
@@ -120,7 +120,7 @@
         </div>
 
         <!-- Reader B psychological snapshot -->
-        {% set psych_b = profile_b.ai_psychological %}
+        {% set psych_b = ai_b.psychological %}
         <div class="bg-gradient-to-br from-cyan-50 to-teal-50 dark:from-cyan-950 dark:to-teal-950 border border-cyan-200 dark:border-cyan-800 rounded-xl p-6">
             <h3 class="font-serif font-bold text-lg text-cyan-900 dark:text-cyan-100 mb-4">{{ profile_b.username }}</h3>
             {% if psych_b %}
@@ -149,8 +149,8 @@
     </div>
 
     <!-- Side-by-side Vibes -->
-    {% set vibe_a = profile_a.ai_vibe_check %}
-    {% set vibe_b = profile_b.ai_vibe_check %}
+    {% set vibe_a = ai_a.vibe_check %}
+    {% set vibe_b = ai_b.vibe_check %}
     {% if vibe_a or vibe_b %}
     <div class="card p-6">
         <h3 class="font-display font-semibold text-lg mb-4 text-warm-700 dark:text-warm-200">Reading Vibes</h3>
@@ -184,8 +184,8 @@
     {% endif %}
 
     <!-- Side-by-side Red & Green Flags -->
-    {% set flags_a = profile_a.ai_red_green_flags %}
-    {% set flags_b = profile_b.ai_red_green_flags %}
+    {% set flags_a = ai_a.red_green_flags %}
+    {% set flags_b = ai_b.red_green_flags %}
     {% if flags_a or flags_b %}
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
         {% if flags_a %}
@@ -196,7 +196,7 @@
                 <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-2">Green Flags</p>
                 <ul class="space-y-1">
                     {% for f in flags_a.green_flags[:3] %}
-                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-emerald-500 shrink-0">✓</span>{{ f }}</li>
+                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-emerald-500 shrink-0">✓</span>{{ f.flag if f.flag is defined else f }}</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -206,7 +206,7 @@
                 <p class="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide mb-2">Red Flags</p>
                 <ul class="space-y-1">
                     {% for f in flags_a.red_flags[:3] %}
-                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-red-500 shrink-0">✗</span>{{ f }}</li>
+                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-red-500 shrink-0">✗</span>{{ f.flag if f.flag is defined else f }}</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -221,7 +221,7 @@
                 <p class="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-2">Green Flags</p>
                 <ul class="space-y-1">
                     {% for f in flags_b.green_flags[:3] %}
-                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-emerald-500 shrink-0">✓</span>{{ f }}</li>
+                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-emerald-500 shrink-0">✓</span>{{ f.flag if f.flag is defined else f }}</li>
                     {% endfor %}
                 </ul>
             </div>
@@ -231,7 +231,7 @@
                 <p class="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide mb-2">Red Flags</p>
                 <ul class="space-y-1">
                     {% for f in flags_b.red_flags[:3] %}
-                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-red-500 shrink-0">✗</span>{{ f }}</li>
+                    <li class="text-sm text-warm-700 dark:text-warm-300 flex gap-2"><span class="text-red-500 shrink-0">✗</span>{{ f.flag if f.flag is defined else f }}</li>
                     {% endfor %}
                 </ul>
             </div>

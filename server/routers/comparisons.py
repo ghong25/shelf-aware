@@ -55,6 +55,19 @@ async def compare_page(request: Request, comparison_slug: str):
     dynamics = comp_data.get("dynamics", {})
     recs = comp_data.get("recommendations", {})
 
+    _ai_keys = ["ai_psychological", "ai_vibe_check", "ai_red_green_flags"]
+
+    def _parse_ai(profile):
+        result = {}
+        for key in _ai_keys:
+            val = profile.get(key)
+            if val is not None:
+                result[key.removeprefix("ai_")] = val if isinstance(val, dict) else json.loads(val)
+        return result
+
+    ai_a = _parse_ai(profile_a)
+    ai_b = _parse_ai(profile_b)
+
     return request.app.state.templates.TemplateResponse(
         "compare.html",
         {
@@ -67,5 +80,7 @@ async def compare_page(request: Request, comparison_slug: str):
             "dynamics": dynamics,
             "recs": recs,
             "comp_json": json.dumps(hard_stats),
+            "ai_a": ai_a,
+            "ai_b": ai_b,
         },
     )
