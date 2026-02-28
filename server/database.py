@@ -65,6 +65,55 @@ async def get_recent_comparisons(limit: int = 6) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+async def get_benchmark_stats(goodreads_id: str) -> dict | None:
+    row = await get_pool().fetchrow(
+        """
+        WITH user_stat AS (
+            SELECT
+                (stats_json->'attention_span'->>'avg_pages')::float       AS avg_pages,
+                (stats_json->'reading_pace'->>'books_per_year')::float    AS books_per_year,
+                (stats_json->'genre_radar'->>'diversity_score')::float    AS diversity_score,
+                (stats_json->'rating_distribution'->>'average')::float   AS avg_rating
+            FROM profiles WHERE goodreads_id = $1
+        ),
+        pop AS (
+            SELECT
+                (stats_json->'attention_span'->>'avg_pages')::float       AS avg_pages,
+                (stats_json->'reading_pace'->>'books_per_year')::float    AS books_per_year,
+                (stats_json->'genre_radar'->>'diversity_score')::float    AS diversity_score,
+                (stats_json->'rating_distribution'->>'average')::float   AS avg_rating
+            FROM profiles
+            WHERE (stats_json->'attention_span'->>'avg_pages') IS NOT NULL
+              AND (stats_json->'attention_span'->>'avg_pages')::float > 0
+        )
+        SELECT
+            ROUND((SELECT COUNT(*) FROM pop WHERE avg_pages       < (SELECT avg_pages       FROM user_stat)) * 100.0 / NULLIF(COUNT(*),0)) AS pages_pct,
+            ROUND((SELECT COUNT(*) FROM pop WHERE books_per_year  < (SELECT books_per_year  FROM user_stat)) * 100.0 / NULLIF(COUNT(*),0)) AS pace_pct,
+            ROUND((SELECT COUNT(*) FROM pop WHERE diversity_score < (SELECT diversity_score FROM user_stat)) * 100.0 / NULLIF(COUNT(*),0)) AS diversity_pct,
+            ROUND((SELECT COUNT(*) FROM pop WHERE avg_rating      < (SELECT avg_rating      FROM user_stat)) * 100.0 / NULLIF(COUNT(*),0)) AS rating_pct,
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY avg_pages)      AS median_pages,
+            PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY books_per_year) AS median_bpy,
+            COUNT(*) AS total_profiles
+        FROM pop
+        """,
+        goodreads_id,
+    )
+    if row is None:
+        return None
+    d = dict(row)
+    if d.get("total_profiles") is None or d["total_profiles"] < 5:
+        return None
+    return {
+        "pages_pct": int(d["pages_pct"]) if d["pages_pct"] is not None else None,
+        "pace_pct": int(d["pace_pct"]) if d["pace_pct"] is not None else None,
+        "diversity_pct": int(d["diversity_pct"]) if d["diversity_pct"] is not None else None,
+        "rating_pct": int(d["rating_pct"]) if d["rating_pct"] is not None else None,
+        "median_pages": round(float(d["median_pages"]), 1) if d["median_pages"] is not None else None,
+        "median_bpy": round(float(d["median_bpy"]), 1) if d["median_bpy"] is not None else None,
+        "total_profiles": int(d["total_profiles"]),
+    }
+
+
 async def get_comparison(id1: str, id2: str) -> dict | None:
     row = await get_pool().fetchrow(
         """SELECT c.*, pa.goodreads_id AS gid_a, pb.goodreads_id AS gid_b

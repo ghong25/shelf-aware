@@ -120,6 +120,18 @@
             <div class="metric-card">
                 <p class="metric-value count-up" data-count-target="{{ stats.attention_span.avg_pages|int }}">{{ stats.attention_span.avg_pages|int }}p</p>
                 <p class="metric-label">Avg Length</p>
+                {% if benchmarks and benchmarks.pages_pct is not none and benchmarks.pages_pct > 0 %}
+                <p class="text-xs text-warm-400 mt-0.5">longer reads than {{ benchmarks.pages_pct }}% of readers</p>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% if stats.get('rating_distribution') and stats.rating_distribution.average %}
+            <div class="metric-card">
+                <p class="metric-value">{{ stats.rating_distribution.average }}</p>
+                <p class="metric-label">Avg Rating</p>
+                {% if benchmarks and benchmarks.rating_pct is not none and benchmarks.rating_pct > 0 %}
+                <p class="text-xs text-warm-400 mt-0.5">rates higher than {{ benchmarks.rating_pct }}% of readers</p>
+                {% endif %}
             </div>
             {% endif %}
             {% if stats.get('genre_radar') and stats.genre_radar.top_genre %}
@@ -164,7 +176,10 @@
             {% if stats.get('genre_radar') and stats.genre_radar.top_genre %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Genre Radar</h3>
-                <p class="text-warm-400 text-xs mb-4">Your reading spread across genres</p>
+                <p class="text-warm-400 text-xs mb-1">Your reading spread across genres</p>
+                {% if benchmarks and benchmarks.diversity_pct is not none and benchmarks.diversity_pct > 0 %}
+                <p class="text-xs text-warm-400 mb-3">more genre-diverse than {{ benchmarks.diversity_pct }}% of readers</p>
+                {% endif %}
                 <canvas id="chart-genres" height="240"></canvas>
             </div>
             {% endif %}
@@ -188,7 +203,10 @@
             {% if stats.get('reading_pace') and stats.reading_pace.total_years %}
             <div class="card p-6">
                 <h3 class="font-display font-semibold text-lg mb-1 text-warm-700 dark:text-warm-200">Reading Pace</h3>
-                <p class="text-warm-400 text-xs mb-4">Books finished over time</p>
+                <p class="text-warm-400 text-xs mb-1">Books finished over time</p>
+                {% if benchmarks and benchmarks.pace_pct is not none and benchmarks.pace_pct > 0 %}
+                <p class="text-xs text-warm-400 mb-3">reads faster than {{ benchmarks.pace_pct }}% of readers · avg reader: {{ benchmarks.median_bpy }} books/yr</p>
+                {% endif %}
                 <canvas id="chart-pace" height="200"></canvas>
             </div>
             {% endif %}
@@ -542,6 +560,7 @@
 {% block scripts %}
 <script>
     const statsData = {{ stats_json | safe }};
+    const benchmarks = {{ benchmarks_json | safe }};
 
     // Track which tabs have had their charts rendered
     const chartRendered = new Set();

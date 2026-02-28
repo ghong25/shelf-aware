@@ -368,10 +368,13 @@ function renderDualRadar(canvasId, chartData, labelA, labelB) {
     });
 }
 
-function renderGenreHBar(canvasId, chartData, labelA, labelB) {
+function renderGenreHBar(canvasId, chartData, labelA, labelB, totalA = null, totalB = null) {
     const el = document.getElementById(canvasId);
     if (!el || !chartData) return;
     const c = getChartColors();
+    const pct = totalA != null && totalB != null;
+    const dataA = pct ? chartData.values_a.map(v => +(v / totalA * 100).toFixed(1)) : chartData.values_a;
+    const dataB = pct ? chartData.values_b.map(v => +(v / totalB * 100).toFixed(1)) : chartData.values_b;
     new Chart(el, {
         type: 'bar',
         data: {
@@ -379,7 +382,7 @@ function renderGenreHBar(canvasId, chartData, labelA, labelB) {
             datasets: [
                 {
                     label: labelA || 'Reader A',
-                    data: chartData.values_a,
+                    data: dataA,
                     backgroundColor: c.accent + 'cc',
                     borderColor: c.accent,
                     borderWidth: 1,
@@ -387,7 +390,7 @@ function renderGenreHBar(canvasId, chartData, labelA, labelB) {
                 },
                 {
                     label: labelB || 'Reader B',
-                    data: chartData.values_b,
+                    data: dataB,
                     backgroundColor: c.palette[1] + 'cc',
                     borderColor: c.palette[1],
                     borderWidth: 1,
@@ -405,12 +408,13 @@ function renderGenreHBar(canvasId, chartData, labelA, labelB) {
                     backgroundColor: c.tooltipBg,
                     titleColor: c.tooltipText,
                     bodyColor: c.tooltipText,
+                    callbacks: pct ? { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.x}%` } : {},
                 },
             },
             scales: {
                 x: {
                     grid: { color: c.grid },
-                    ticks: { color: c.secondary },
+                    ticks: { color: c.secondary, callback: pct ? v => v + '%' : undefined },
                     beginAtZero: true,
                 },
                 y: {
@@ -422,10 +426,13 @@ function renderGenreHBar(canvasId, chartData, labelA, labelB) {
     });
 }
 
-function renderDualBar(canvasId, chartData, labelA, labelB) {
+function renderDualBar(canvasId, chartData, labelA, labelB, totalA = null, totalB = null) {
     const el = document.getElementById(canvasId);
     if (!el || !chartData) return;
     const c = getChartColors();
+    const pct = totalA != null && totalB != null;
+    const dataA = pct ? chartData.values_a.map(v => +(v / totalA * 100).toFixed(1)) : chartData.values_a;
+    const dataB = pct ? chartData.values_b.map(v => +(v / totalB * 100).toFixed(1)) : chartData.values_b;
     new Chart(el, {
         type: 'bar',
         data: {
@@ -433,13 +440,13 @@ function renderDualBar(canvasId, chartData, labelA, labelB) {
             datasets: [
                 {
                     label: labelA || 'Reader A',
-                    data: chartData.values_a,
+                    data: dataA,
                     backgroundColor: c.accent,
                     borderRadius: 8,
                 },
                 {
                     label: labelB || 'Reader B',
-                    data: chartData.values_b,
+                    data: dataB,
                     backgroundColor: c.palette[1],
                     borderRadius: 8,
                 },
@@ -453,6 +460,14 @@ function renderDualBar(canvasId, chartData, labelA, labelB) {
                     backgroundColor: c.tooltipBg,
                     titleColor: c.tooltipText,
                     bodyColor: c.tooltipText,
+                    callbacks: pct ? { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}%` } : {},
+                },
+            },
+            scales: {
+                ...getDefaultOptions().scales,
+                y: {
+                    ...getDefaultOptions().scales.y,
+                    ticks: { color: c.secondary, callback: pct ? v => v + '%' : undefined },
                 },
             },
         },
@@ -710,12 +725,12 @@ window.addEventListener('darkModeToggle', () => {
         if (compData.genre_overlap && compData.genre_overlap.dual_chart_data) {
             const labelA = document.querySelector('[class*="text-amber-700"]')?.textContent;
             const labelB = document.querySelector('[class*="text-cyan-700"]')?.textContent;
-            renderGenreHBar('chart-genre-dual', compData.genre_overlap.dual_chart_data, labelA, labelB);
+            renderGenreHBar('chart-genre-dual', compData.genre_overlap.dual_chart_data, labelA, labelB, bookCounts?.a, bookCounts?.b);
         }
         if (compData.decades_alignment && compData.decades_alignment.dual_chart_data) {
             const labelA = document.querySelector('[class*="text-amber-700"]')?.textContent;
             const labelB = document.querySelector('[class*="text-cyan-700"]')?.textContent;
-            renderDualBar('chart-decades-dual', compData.decades_alignment.dual_chart_data, labelA, labelB);
+            renderDualBar('chart-decades-dual', compData.decades_alignment.dual_chart_data, labelA, labelB, bookCounts?.a, bookCounts?.b);
         }
     }
 });

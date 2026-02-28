@@ -1,10 +1,11 @@
+import asyncio
 import json
 import re
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 
-from server.database import get_profile
+from server.database import get_benchmark_stats, get_profile
 
 
 def slugify(text: str) -> str:
@@ -39,7 +40,10 @@ async def profile_page(request: Request, goodreads_id: str):
 
 
 async def _render_profile(request: Request, goodreads_id: str):
-    profile = await get_profile(goodreads_id)
+    profile, benchmarks = await asyncio.gather(
+        get_profile(goodreads_id),
+        get_benchmark_stats(goodreads_id),
+    )
     if profile is None:
         return request.app.state.templates.TemplateResponse(
             "home.html",
@@ -74,6 +78,8 @@ async def _render_profile(request: Request, goodreads_id: str):
             "books": books,
             "ai": ai_sections,
             "stats_json": json.dumps(stats),
+            "benchmarks": benchmarks,
+            "benchmarks_json": json.dumps(benchmarks or {}),
         },
     )
 

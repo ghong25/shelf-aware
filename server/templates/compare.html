@@ -693,14 +693,15 @@
 {% block scripts %}
 <script>
     const compData = {{ comp_json | safe }};
+    const bookCounts = { a: {{ profile_a.book_count }}, b: {{ profile_b.book_count }} };
 
     if (compData.genre_overlap && compData.genre_overlap.dual_chart_data)
         renderGenreHBar('chart-genre-dual', compData.genre_overlap.dual_chart_data,
-            '{{ profile_a.username }}', '{{ profile_b.username }}');
+            '{{ profile_a.username }}', '{{ profile_b.username }}', bookCounts.a, bookCounts.b);
 
     if (compData.decades_alignment && compData.decades_alignment.dual_chart_data)
         renderDualBar('chart-decades-dual', compData.decades_alignment.dual_chart_data,
-            '{{ profile_a.username }}', '{{ profile_b.username }}');
+            '{{ profile_a.username }}', '{{ profile_b.username }}', bookCounts.a, bookCounts.b);
 
     // Section nav intersection observer
     (function() {
