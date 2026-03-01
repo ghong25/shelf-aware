@@ -3,6 +3,7 @@ import asyncpg
 import hashlib
 import json
 import os
+import random
 import re
 import time
 
@@ -304,13 +305,14 @@ async def get_platform_book_covers(limit: int = 100) -> list[dict]:
         return _book_covers_cache
 
     rows = await get_pool().fetch("""
-        SELECT DISTINCT book->>'cover_url' AS cover_url, book->>'title' AS title
+        SELECT DISTINCT ON (book->>'cover_url') book->>'cover_url' AS cover_url, book->>'title' AS title
         FROM profiles, LATERAL jsonb_array_elements(books_json) AS book
         WHERE book->>'cover_url' IS NOT NULL AND book->>'cover_url' != ''
-        ORDER BY cover_url
+        ORDER BY book->>'cover_url'
         LIMIT $1
     """, limit)
     result = [{"cover_url": r["cover_url"], "title": r["title"]} for r in rows]
+    random.shuffle(result)
     _book_covers_cache = result
     _book_covers_cache_time = time.time()
     return result
