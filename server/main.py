@@ -9,11 +9,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from server.database import (close_pool, ensure_requests_table, get_analytics,
-                              get_era_distribution, get_pending_requests,
-                              get_platform_book_covers, get_platform_stats,
+                              get_comparison, get_era_distribution,
+                              get_pending_requests, get_platform_book_covers,
+                              get_platform_stats, get_profile,
                               get_recent_comparisons, get_recent_profiles,
-                              get_roast_snippets, init_pool, log_page_view,
-                              store_request)
+                              get_roast_snippets, extract_goodreads_id,
+                              init_pool, log_page_view, store_request)
 from server.routers import comparisons, profiles
 from server.routers.profiles import _get_client_ip, slugify
 
@@ -66,6 +67,8 @@ async def home(request: Request):
             "book_covers": book_covers,
             "success": request.query_params.get("success"),
             "error": request.query_params.get("error"),
+            "exists_profile": request.query_params.get("exists_profile"),
+            "exists_comparison": request.query_params.get("exists_comparison"),
         }
     )
 
@@ -77,6 +80,16 @@ async def request_profile(request: Request):
     url = (form.get("goodreads_url") or "").strip()
     if not url:
         return RedirectResponse("/?error=Please+provide+a+Goodreads+URL", 303)
+
+    gid = extract_goodreads_id(url)
+    existing = await get_profile(gid) if gid else None
+    if existing:
+        profile_slug = slugify(existing.get("username") or gid)
+        profile_path = f"/u/{profile_slug}-{existing['goodreads_id']}"
+        await store_request("profile", name, url, status="fulfilled")
+        from urllib.parse import quote
+        return RedirectResponse(f"/?exists_profile={quote(profile_path, safe='/')}", 303)
+
     await store_request("profile", name, url)
     return RedirectResponse("/?success=profile", 303)
 
@@ -89,6 +102,20 @@ async def request_comparison(request: Request):
     url2 = (form.get("goodreads_url_2") or "").strip()
     if not url1 or not url2:
         return RedirectResponse("/?error=Please+provide+both+Goodreads+URLs", 303)
+
+    id1 = extract_goodreads_id(url1)
+    id2 = extract_goodreads_id(url2)
+    existing = await get_comparison(id1, id2) if id1 and id2 else None
+    if existing:
+        profile_a = await get_profile(id1)
+        profile_b = await get_profile(id2)
+        slug_a = slugify(profile_a.get("username") or id1) if profile_a else id1
+        slug_b = slugify(profile_b.get("username") or id2) if profile_b else id2
+        compare_path = f"/compare/{slug_a}-{id1}-vs-{slug_b}-{id2}"
+        await store_request("comparison", name, url1, url2, status="fulfilled")
+        from urllib.parse import quote
+        return RedirectResponse(f"/?exists_comparison={quote(compare_path, safe='/')}", 303)
+
     await store_request("comparison", name, url1, url2)
     return RedirectResponse("/?success=comparison", 303)
 

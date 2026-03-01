@@ -76,6 +76,25 @@ ON CONFLICT (profile_a_id, profile_b_id) DO UPDATE SET
     created_at      = NOW();
 """
 
+FULFILL_PROFILE_REQUESTS_SQL = """
+UPDATE analysis_requests
+SET status = 'fulfilled'
+WHERE status = 'pending'
+  AND request_type = 'profile'
+  AND goodreads_url_1 LIKE %(pattern)s
+"""
+
+FULFILL_COMPARISON_REQUESTS_SQL = """
+UPDATE analysis_requests
+SET status = 'fulfilled'
+WHERE status = 'pending'
+  AND request_type = 'comparison'
+  AND (
+    (goodreads_url_1 LIKE %(pattern_a)s AND goodreads_url_2 LIKE %(pattern_b)s)
+    OR (goodreads_url_1 LIKE %(pattern_b)s AND goodreads_url_2 LIKE %(pattern_a)s)
+  )
+"""
+
 
 def get_database_url() -> str:
     """Return DATABASE_URL from the environment."""
@@ -117,6 +136,7 @@ def store_profile(data: dict) -> None:
         with conn:
             with conn.cursor() as cur:
                 cur.execute(UPSERT_PROFILE_SQL, params)
+                cur.execute(FULFILL_PROFILE_REQUESTS_SQL, {"pattern": f"%/user/show/{user_id}%"})
         conn.close()
     except psycopg2.Error as exc:
         print(f"ERROR: Failed to upsert profile: {exc}", file=sys.stderr)
@@ -152,6 +172,10 @@ def store_comparison(data: dict) -> None:
         with conn:
             with conn.cursor() as cur:
                 cur.execute(UPSERT_COMPARISON_SQL, params)
+                cur.execute(FULFILL_COMPARISON_REQUESTS_SQL, {
+                    "pattern_a": f"%/user/show/{profile_a}%",
+                    "pattern_b": f"%/user/show/{profile_b}%",
+                })
         conn.close()
     except psycopg2.Error as exc:
         print(f"ERROR: Failed to upsert comparison: {exc}", file=sys.stderr)

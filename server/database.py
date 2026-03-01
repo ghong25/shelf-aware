@@ -444,6 +444,12 @@ async def get_analytics() -> dict:
     }
 
 
+def extract_goodreads_id(url: str) -> str | None:
+    """Extract numeric Goodreads user ID from a profile URL."""
+    m = re.search(r'/user/show/(\d+)', url)
+    return m.group(1) if m else None
+
+
 async def ensure_requests_table():
     await get_pool().execute("""
         CREATE TABLE IF NOT EXISTS analysis_requests (
@@ -459,12 +465,41 @@ async def ensure_requests_table():
 
 
 async def store_request(request_type: str, requester_name: str,
-                        url1: str, url2: str | None = None) -> None:
+                        url1: str, url2: str | None = None,
+                        status: str = "pending") -> None:
     await get_pool().execute(
         """INSERT INTO analysis_requests
-           (request_type, requester_name, goodreads_url_1, goodreads_url_2)
-           VALUES ($1, $2, $3, $4)""",
-        request_type, requester_name, url1, url2,
+           (request_type, requester_name, goodreads_url_1, goodreads_url_2, status)
+           VALUES ($1, $2, $3, $4, $5)""",
+        request_type, requester_name, url1, url2, status,
+    )
+
+
+async def fulfill_profile_requests(goodreads_id: str) -> None:
+    """Mark any pending profile requests for this user as fulfilled."""
+    await get_pool().execute(
+        """UPDATE analysis_requests
+           SET status = 'fulfilled'
+           WHERE status = 'pending'
+             AND request_type = 'profile'
+             AND goodreads_url_1 LIKE $1""",
+        f"%/user/show/{goodreads_id}%",
+    )
+
+
+async def fulfill_comparison_requests(id_a: str, id_b: str) -> None:
+    """Mark any pending comparison requests for this pair as fulfilled."""
+    await get_pool().execute(
+        """UPDATE analysis_requests
+           SET status = 'fulfilled'
+           WHERE status = 'pending'
+             AND request_type = 'comparison'
+             AND (
+               (goodreads_url_1 LIKE $1 AND goodreads_url_2 LIKE $2)
+               OR (goodreads_url_1 LIKE $2 AND goodreads_url_2 LIKE $1)
+             )""",
+        f"%/user/show/{id_a}%",
+        f"%/user/show/{id_b}%",
     )
 
 
