@@ -9,9 +9,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from server.database import (close_pool, ensure_requests_table, get_analytics,
-                              get_pending_requests, get_recent_comparisons,
-                              get_recent_profiles, init_pool, log_page_view,
-                              store_request)
+                              get_pending_requests, get_platform_stats,
+                              get_recent_comparisons, get_recent_profiles,
+                              init_pool, log_page_view, store_request)
 from server.routers import comparisons, profiles
 from server.routers.profiles import _get_client_ip, slugify
 
@@ -31,6 +31,7 @@ app = FastAPI(title="Shelf Aware", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
 templates.env.filters["slugify"] = slugify
+templates.env.filters["format_number"] = lambda n: "{:,}".format(int(n)) if n else "0"
 app.state.templates = templates
 
 app.include_router(profiles.router)
@@ -39,9 +40,10 @@ app.include_router(comparisons.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    recent, recent_comparisons = await asyncio.gather(
+    recent, recent_comparisons, platform_stats = await asyncio.gather(
         get_recent_profiles(limit=12),
         get_recent_comparisons(limit=6),
+        get_platform_stats(),
     )
     asyncio.create_task(log_page_view(
         "home", None,
@@ -53,6 +55,7 @@ async def home(request: Request):
             "request": request,
             "recent": recent,
             "recent_comparisons": recent_comparisons,
+            "platform_stats": platform_stats,
             "success": request.query_params.get("success"),
             "error": request.query_params.get("error"),
         }

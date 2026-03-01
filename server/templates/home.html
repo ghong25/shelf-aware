@@ -96,6 +96,86 @@
 </div>
 {% endif %}
 
+{% if platform_stats and platform_stats.total_profiles >= 1 %}
+<section class="mb-10">
+    <div class="section-divider mb-10"></div>
+
+    <!-- Row 1: Platform Vitals -->
+    <div class="card p-6 mb-4">
+        <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-center">
+            <div>
+                <div class="text-4xl font-bold font-display text-warm-800 dark:text-warm-100">
+                    {{ platform_stats.total_profiles | format_number }}
+                </div>
+                <div class="text-xs text-warm-400 uppercase tracking-wider mt-1">Readers Analyzed</div>
+            </div>
+            <div class="hidden sm:block h-10 w-px bg-warm-200 dark:bg-warm-700"></div>
+            <div>
+                <div class="text-4xl font-bold font-display text-warm-800 dark:text-warm-100">
+                    {{ platform_stats.total_books | format_number }}
+                </div>
+                <div class="text-xs text-warm-400 uppercase tracking-wider mt-1">Books on the Collective Shelf</div>
+            </div>
+            <div class="hidden sm:block h-10 w-px bg-warm-200 dark:bg-warm-700"></div>
+            <div>
+                <div class="text-4xl font-bold font-display text-warm-800 dark:text-warm-100">
+                    {{ platform_stats.total_comparisons | format_number }}
+                </div>
+                <div class="text-xs text-warm-400 uppercase tracking-wider mt-1">Relationships Tested</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Personality Cards -->
+    {% if platform_stats.hype_pct is not none or platform_stats.dominant_archetype or platform_stats.avg_rating_delta is not none %}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+        <!-- Vibe Split -->
+        {% if platform_stats.hype_pct is not none %}
+        <div class="card p-5">
+            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">Community Vibe</div>
+            <div class="flex justify-between text-sm font-display mb-2">
+                <span class="text-amber-600 dark:text-amber-400 font-semibold">{{ platform_stats.hype_pct }}% Hype Beasts</span>
+                <span class="text-blue-600 dark:text-blue-400 font-semibold">{{ platform_stats.critic_pct }}% Critics</span>
+            </div>
+            <div class="h-3 rounded-full overflow-hidden bg-blue-200 dark:bg-blue-900">
+                <div class="h-full rounded-full bg-amber-400 dark:bg-amber-500 transition-all"
+                     style="width: {{ platform_stats.hype_pct }}%"></div>
+            </div>
+            <p class="text-xs text-warm-400 mt-2 italic">Easily pleased vs. tough critics</p>
+        </div>
+        {% endif %}
+
+        <!-- Dominant Archetype -->
+        {% if platform_stats.dominant_archetype %}
+        <div class="card p-5">
+            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">Most Common Diagnosis</div>
+            <div class="text-lg font-display font-semibold text-warm-800 dark:text-warm-100 italic">
+                "{{ platform_stats.dominant_archetype }}"
+            </div>
+            <p class="text-xs text-warm-400 mt-2">The most prevalent reader archetype</p>
+        </div>
+        {% endif %}
+
+        <!-- Rating Delta -->
+        {% if platform_stats.avg_rating_delta is not none %}
+        <div class="card p-5">
+            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">vs. Goodreads Average</div>
+            {% set delta = platform_stats.avg_rating_delta %}
+            <div class="text-3xl font-bold font-display {% if delta < 0 %}text-red-500 dark:text-red-400{% else %}text-green-500 dark:text-green-400{% endif %}">
+                {% if delta >= 0 %}+{% endif %}{{ "%.2f"|format(delta) }}★
+            </div>
+            <p class="text-xs text-warm-400 mt-2 italic">
+                {% if delta < 0 %}We don't trust the hype.{% else %}We're easily entertained.{% endif %}
+            </p>
+        </div>
+        {% endif %}
+
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+
 <!-- How It Works -->
 <section class="mb-16">
     <div class="section-divider mb-10"></div>

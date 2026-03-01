@@ -3,6 +3,7 @@ import asyncpg
 import hashlib
 import json
 import os
+import time
 
 
 _pool: asyncpg.Pool | None = None
@@ -65,6 +66,67 @@ async def get_recent_comparisons(limit: int = 6) -> list[dict]:
         limit,
     )
     return [dict(r) for r in rows]
+
+
+_platform_stats_cache: dict | None = None
+_platform_stats_cache_time: float = 0.0
+_PLATFORM_STATS_TTL = 600  # 10 minutes
+
+
+async def get_platform_stats() -> dict:
+    global _platform_stats_cache, _platform_stats_cache_time
+    if _platform_stats_cache and (time.time() - _platform_stats_cache_time) < _PLATFORM_STATS_TTL:
+        return _platform_stats_cache
+
+    pool = get_pool()
+
+    vitals, comp_count, archetype_row = await asyncio.gather(
+        pool.fetchrow("""
+            SELECT
+                COUNT(*)                                                                AS total_profiles,
+                COALESCE(SUM(book_count), 0)                                           AS total_books,
+                AVG(CASE
+                    WHEN stats_json->'hater_hype' IS NOT NULL
+                    THEN (stats_json->'hater_hype'->>'mean_diff')::float
+                END)                                                                    AS avg_rating_delta,
+                COUNT(*) FILTER (
+                    WHERE stats_json->'hater_hype' IS NOT NULL
+                    AND (stats_json->'hater_hype'->>'mean_diff')::float >= 0
+                )                                                                       AS hype_count,
+                COUNT(*) FILTER (
+                    WHERE stats_json->'hater_hype' IS NOT NULL
+                    AND (stats_json->'hater_hype'->>'mean_diff')::float < 0
+                )                                                                       AS critic_count
+            FROM profiles
+        """),
+        pool.fetchval("SELECT COUNT(*) FROM comparisons"),
+        pool.fetchrow("""
+            SELECT ai_psychological->>'archetype' AS archetype, COUNT(*) AS cnt
+            FROM profiles
+            WHERE ai_psychological IS NOT NULL
+              AND ai_psychological->>'archetype' IS NOT NULL
+            GROUP BY archetype
+            ORDER BY cnt DESC
+            LIMIT 1
+        """),
+    )
+
+    total_with_stats = (vitals["hype_count"] or 0) + (vitals["critic_count"] or 0)
+    hype_pct = round((vitals["hype_count"] or 0) * 100 / total_with_stats) if total_with_stats else None
+
+    result = {
+        "total_profiles":    int(vitals["total_profiles"]),
+        "total_books":       int(vitals["total_books"]),
+        "total_comparisons": int(comp_count or 0),
+        "avg_rating_delta":  round(float(vitals["avg_rating_delta"]), 2) if vitals["avg_rating_delta"] is not None else None,
+        "hype_pct":          hype_pct,
+        "critic_pct":        (100 - hype_pct) if hype_pct is not None else None,
+        "dominant_archetype": archetype_row["archetype"] if archetype_row else None,
+    }
+
+    _platform_stats_cache = result
+    _platform_stats_cache_time = time.time()
+    return result
 
 
 async def get_benchmark_stats(goodreads_id: str) -> dict | None:
