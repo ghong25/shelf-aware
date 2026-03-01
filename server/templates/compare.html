@@ -727,6 +727,7 @@
 
         navItems.forEach(item => {
             item.addEventListener('click', (e) => {
+                if (!item.dataset.section) return;
                 e.preventDefault();
                 const target = document.getElementById(item.dataset.section);
                 if (target) {
