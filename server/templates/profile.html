@@ -24,8 +24,16 @@
         <h1 class="text-4xl md:text-5xl font-serif font-bold text-warm-800 dark:text-warm-100">{{ profile.username or profile.goodreads_id }}</h1>
 
         {% if ai.get('psychological') and ai.psychological.archetype %}
-        <div class="inline-block mt-3 bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-700 rounded-full px-4 py-1.5">
-            <span class="text-amber-800 dark:text-amber-300 font-semibold text-sm">{{ ai.psychological.archetype }}</span>
+        <div class="relative group inline-block mt-3">
+            <div class="bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-700 rounded-full px-4 py-1.5 cursor-default">
+                <span class="text-amber-800 dark:text-amber-300 font-semibold text-sm">{{ ai.psychological.archetype }}</span>
+            </div>
+            {% if ai.psychological.archetype_tagline %}
+            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 bg-warm-900 dark:bg-warm-100 text-warm-100 dark:text-warm-900 text-xs rounded px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                {{ ai.psychological.archetype_tagline }}
+                <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-warm-900 dark:border-t-warm-100"></div>
+            </div>
+            {% endif %}
         </div>
         {% endif %}
 
