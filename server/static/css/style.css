@@ -647,6 +647,186 @@ html.dark .tab-toc .toc-link.active {
     font-weight: 500;
 }
 
+/* ===== Marquee Ticker ===== */
+@keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+.marquee-strip {
+    overflow: hidden;
+    background: #2D2319;
+    border-bottom: 1px solid #3D3429;
+    padding: 0.5rem 0;
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 40s linear infinite;
+    white-space: nowrap;
+}
+
+.marquee-track:hover {
+    animation-play-state: paused;
+}
+
+.marquee-item {
+    font-size: 0.8125rem;
+    color: #9C8E7C;
+    padding: 0 2rem;
+    font-style: italic;
+}
+
+.marquee-sep {
+    color: #524639;
+    padding: 0 0.25rem;
+}
+
+/* ===== Book Cover Carousel ===== */
+@keyframes carousel-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+.book-carousel {
+    overflow: hidden;
+    padding: 1.5rem 0;
+    mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+.carousel-track {
+    display: flex;
+    gap: 12px;
+    width: max-content;
+    animation: carousel-scroll 120s linear infinite;
+}
+
+.carousel-track:hover {
+    animation-play-state: paused;
+}
+
+.book-cover-item {
+    width: 80px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+    opacity: 0.85;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.book-cover-item:hover {
+    opacity: 1;
+    transform: translateY(-4px);
+}
+
+/* ===== Stat Bar Chart (CSS-only) ===== */
+.stat-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.stat-bar-label {
+    font-size: 0.75rem;
+    color: #6B5E50;
+    width: 100px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stat-bar-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: #F0E9DF;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: #F59E0B;
+    transition: width 0.6s ease;
+}
+
+.stat-bar-fill.era-fill {
+    background: #D97706;
+}
+
+.stat-bar-count {
+    font-size: 0.6875rem;
+    color: #9C8E7C;
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* ===== Patron Saint Card ===== */
+.book-cover-stack {
+    position: relative;
+    height: 80px;
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.book-cover-stack img {
+    position: absolute;
+    width: 52px;
+    height: 76px;
+    object-fit: cover;
+    border-radius: 3px;
+    border: 2px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.book-cover-stack img:nth-child(1) { left: 0; top: 0; z-index: 3; transform: rotate(-4deg); }
+.book-cover-stack img:nth-child(2) { left: 28px; top: 2px; z-index: 2; transform: rotate(2deg); }
+.book-cover-stack img:nth-child(3) { left: 56px; top: 0; z-index: 1; transform: rotate(-2deg); }
+
+/* ===== Overrated Book Stamp ===== */
+.overrated-wrap {
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.overrated-wrap img {
+    width: 72px;
+    height: 108px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+}
+
+.overrated-stamp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: rgba(220, 38, 38, 0.9);
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 6px;
+    border-radius: 2px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* ===== Slim Hero (home) ===== */
+.hero-slim {
+    padding: 3rem 0 2.5rem;
+}
+
 /* ===== Media Queries ===== */
 @media (max-width: 640px) {
     .section-nav,
@@ -659,4 +839,38 @@ html.dark .tab-toc .toc-link.active {
         padding: 0.625rem 0.75rem;
         font-size: 0.75rem;
     }
+
+    .stat-bar-label {
+        width: 72px;
+    }
+}
+
+/* ===== Dark Mode — new components ===== */
+html.dark .marquee-strip {
+    background: #1A150E;
+    border-bottom-color: #2D2319;
+}
+
+html.dark .stat-bar-track {
+    background: #3D3429;
+}
+
+html.dark .stat-bar-fill {
+    background: #D97706;
+}
+
+html.dark .stat-bar-fill.era-fill {
+    background: #B45309;
+}
+
+html.dark .stat-bar-label {
+    color: #9C8E7C;
+}
+
+html.dark .book-cover-stack img {
+    border-color: #2D2319;
+}
+
+html.dark .overrated-wrap img {
+    opacity: 0.9;
 }

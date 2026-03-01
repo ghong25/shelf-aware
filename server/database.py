@@ -3,6 +3,7 @@ import asyncpg
 import hashlib
 import json
 import os
+import re
 import time
 
 
@@ -80,11 +81,12 @@ async def get_platform_stats() -> dict:
 
     pool = get_pool()
 
-    vitals, comp_count, archetype_row = await asyncio.gather(
+    vitals, comp_count, archetype_rows, top_genres_rows, patron_row, overrated_row = await asyncio.gather(
         pool.fetchrow("""
             SELECT
                 COUNT(*)                                                                AS total_profiles,
                 COALESCE(SUM(book_count), 0)                                           AS total_books,
+                AVG(book_count)::int                                                    AS avg_books_per_reader,
                 AVG(CASE
                     WHEN stats_json->'hater_hype' IS NOT NULL
                     THEN (stats_json->'hater_hype'->>'mean_diff')::float
@@ -100,13 +102,54 @@ async def get_platform_stats() -> dict:
             FROM profiles
         """),
         pool.fetchval("SELECT COUNT(*) FROM comparisons"),
-        pool.fetchrow("""
+        pool.fetch("""
             SELECT ai_psychological->>'archetype' AS archetype, COUNT(*) AS cnt
             FROM profiles
             WHERE ai_psychological IS NOT NULL
               AND ai_psychological->>'archetype' IS NOT NULL
             GROUP BY archetype
             ORDER BY cnt DESC
+            LIMIT 5
+        """),
+        pool.fetch("""
+            SELECT genre, SUM(cnt::int) AS total
+            FROM profiles,
+                 LATERAL jsonb_each_text(stats_json->'genre_radar'->'genre_counts') AS g(genre, cnt)
+            WHERE stats_json->'genre_radar'->'genre_counts' IS NOT NULL
+            GROUP BY genre
+            ORDER BY total DESC
+            LIMIT 6
+        """),
+        pool.fetchrow("""
+            SELECT
+                b->>'author' AS author,
+                COUNT(*) AS book_count,
+                array_agg(DISTINCT b->>'cover_url') FILTER (
+                    WHERE b->>'cover_url' IS NOT NULL AND b->>'cover_url' != ''
+                ) AS covers
+            FROM profiles,
+                 LATERAL jsonb_array_elements(books_json) AS b
+            WHERE books_json IS NOT NULL
+            GROUP BY b->>'author'
+            ORDER BY book_count DESC
+            LIMIT 1
+        """),
+        pool.fetchrow("""
+            SELECT
+                b->>'title'          AS title,
+                b->>'author'         AS author,
+                b->>'cover_url'      AS cover_url,
+                (b->>'user_rating')::float   AS user_rating,
+                (b->>'average_rating')::float AS goodreads_avg,
+                (b->>'user_rating')::float - (b->>'average_rating')::float AS delta
+            FROM profiles,
+                 LATERAL jsonb_array_elements(books_json) AS b
+            WHERE books_json IS NOT NULL
+              AND (b->>'user_rating') IS NOT NULL
+              AND (b->>'user_rating')::float > 0
+              AND (b->>'average_rating') IS NOT NULL
+              AND (b->>'average_rating')::float > 0
+            ORDER BY delta ASC
             LIMIT 1
         """),
     )
@@ -114,18 +157,162 @@ async def get_platform_stats() -> dict:
     total_with_stats = (vitals["hype_count"] or 0) + (vitals["critic_count"] or 0)
     hype_pct = round((vitals["hype_count"] or 0) * 100 / total_with_stats) if total_with_stats else None
 
+    # Archetype breakdown with percentages
+    total_archetypes = sum(r["cnt"] for r in archetype_rows)
+    archetype_breakdown = [
+        {
+            "archetype": r["archetype"],
+            "count": int(r["cnt"]),
+            "pct": round(int(r["cnt"]) * 100 / total_archetypes) if total_archetypes else 0,
+        }
+        for r in archetype_rows
+    ]
+
+    # Top genres list
+    top_genres = [{"genre": r["genre"], "count": int(r["total"])} for r in top_genres_rows]
+
+    # Patron saint author
+    patron_saint = None
+    if patron_row and patron_row["author"]:
+        covers = patron_row["covers"] or []
+        patron_saint = {
+            "author": patron_row["author"],
+            "book_count": int(patron_row["book_count"]),
+            "covers": covers[:3],
+        }
+
+    # Overrated book
+    overrated_book = None
+    if overrated_row and overrated_row["cover_url"]:
+        overrated_book = {
+            "title": overrated_row["title"],
+            "author": overrated_row["author"],
+            "cover_url": overrated_row["cover_url"],
+            "user_rating": float(overrated_row["user_rating"]),
+            "goodreads_avg": float(overrated_row["goodreads_avg"]),
+            "delta": round(float(overrated_row["delta"]), 2),
+        }
+
     result = {
-        "total_profiles":    int(vitals["total_profiles"]),
-        "total_books":       int(vitals["total_books"]),
-        "total_comparisons": int(comp_count or 0),
-        "avg_rating_delta":  round(float(vitals["avg_rating_delta"]), 2) if vitals["avg_rating_delta"] is not None else None,
-        "hype_pct":          hype_pct,
-        "critic_pct":        (100 - hype_pct) if hype_pct is not None else None,
-        "dominant_archetype": archetype_row["archetype"] if archetype_row else None,
+        "total_profiles":      int(vitals["total_profiles"]),
+        "total_books":         int(vitals["total_books"]),
+        "avg_books_per_reader": int(vitals["avg_books_per_reader"]) if vitals["avg_books_per_reader"] is not None else None,
+        "total_comparisons":   int(comp_count or 0),
+        "avg_rating_delta":    round(float(vitals["avg_rating_delta"]), 2) if vitals["avg_rating_delta"] is not None else None,
+        "hype_pct":            hype_pct,
+        "critic_pct":          (100 - hype_pct) if hype_pct is not None else None,
+        "dominant_archetype":  archetype_rows[0]["archetype"] if archetype_rows else None,
+        "archetype_breakdown": archetype_breakdown,
+        "top_genres":          top_genres,
+        "patron_saint":        patron_saint,
+        "overrated_book":      overrated_book,
     }
 
     _platform_stats_cache = result
     _platform_stats_cache_time = time.time()
+    return result
+
+
+_roast_snippets_cache: list | None = None
+_roast_snippets_cache_time: float = 0.0
+
+
+async def get_roast_snippets() -> list[str]:
+    global _roast_snippets_cache, _roast_snippets_cache_time
+    if _roast_snippets_cache is not None and (time.time() - _roast_snippets_cache_time) < _PLATFORM_STATS_TTL:
+        return _roast_snippets_cache
+
+    rows = await get_pool().fetch("""
+        SELECT ai_roast->>'one_liner' AS one_liner
+        FROM profiles
+        WHERE ai_roast IS NOT NULL AND ai_roast->>'one_liner' IS NOT NULL
+    """)
+    result = [r["one_liner"] for r in rows if r["one_liner"]]
+    _roast_snippets_cache = result
+    _roast_snippets_cache_time = time.time()
+    return result
+
+
+_era_distribution_cache: dict | None = None
+_era_distribution_cache_time: float = 0.0
+
+
+async def get_era_distribution() -> dict:
+    global _era_distribution_cache, _era_distribution_cache_time
+    if _era_distribution_cache is not None and (time.time() - _era_distribution_cache_time) < _PLATFORM_STATS_TTL:
+        return _era_distribution_cache
+
+    rows = await get_pool().fetch("""
+        SELECT stats_json->'reading_eras'->'chart_data' AS era_data
+        FROM profiles
+        WHERE stats_json->'reading_eras' IS NOT NULL
+          AND stats_json->'reading_eras'->'chart_data' IS NOT NULL
+    """)
+
+    decade_totals: dict[str, int] = {}
+    for row in rows:
+        era_data = row["era_data"]
+        if not era_data:
+            continue
+        try:
+            if isinstance(era_data, str):
+                era_data = json.loads(era_data)
+            labels = era_data.get("labels", [])
+            values = era_data.get("values", [])
+            for label, value in zip(labels, values):
+                decade_totals[label] = decade_totals.get(label, 0) + int(value or 0)
+        except (KeyError, TypeError, ValueError):
+            continue
+
+    bucketed: dict[str, int] = {}
+    for label, count in decade_totals.items():
+        m = re.match(r'(\d+)', label)
+        if not m:
+            continue
+        year = int(m.group(1))
+        if year < 1800:
+            key = 'Pre-1800'
+        elif year < 1900:
+            key = '1800s'
+        else:
+            key = label
+        bucketed[key] = bucketed.get(key, 0) + count
+
+    def sort_key(k: str) -> int:
+        if k == 'Pre-1800': return 0
+        if k == '1800s': return 1
+        m = re.match(r'(\d+)', k)
+        return int(m.group(1)) if m else 9999
+
+    sorted_items = sorted(bucketed.items(), key=lambda x: sort_key(x[0]))
+    result = {
+        "labels": [d[0] for d in sorted_items],
+        "values": [d[1] for d in sorted_items],
+    }
+    _era_distribution_cache = result
+    _era_distribution_cache_time = time.time()
+    return result
+
+
+_book_covers_cache: list | None = None
+_book_covers_cache_time: float = 0.0
+
+
+async def get_platform_book_covers(limit: int = 100) -> list[dict]:
+    global _book_covers_cache, _book_covers_cache_time
+    if _book_covers_cache is not None and (time.time() - _book_covers_cache_time) < _PLATFORM_STATS_TTL:
+        return _book_covers_cache
+
+    rows = await get_pool().fetch("""
+        SELECT DISTINCT book->>'cover_url' AS cover_url, book->>'title' AS title
+        FROM profiles, LATERAL jsonb_array_elements(books_json) AS book
+        WHERE book->>'cover_url' IS NOT NULL AND book->>'cover_url' != ''
+        ORDER BY cover_url
+        LIMIT $1
+    """, limit)
+    result = [{"cover_url": r["cover_url"], "title": r["title"]} for r in rows]
+    _book_covers_cache = result
+    _book_covers_cache_time = time.time()
     return result
 
 

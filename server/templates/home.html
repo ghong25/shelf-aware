@@ -3,106 +3,65 @@
 {% block title %}Shelf Aware - What Your Bookshelf Says About You{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="text-center py-16 md:py-24 hero-home relative overflow-hidden">
+
+{# ===== Book Cover Carousel ===== #}
+{% if book_covers | length >= 5 %}
+<div class="book-carousel mb-8">
+    <div class="carousel-track">
+        {% for book in book_covers %}
+        <img class="book-cover-item" src="{{ book.cover_url }}" alt="{{ book.title or 'Book cover' }}" loading="lazy" title="{{ book.title or '' }}">
+        {% endfor %}
+        {# Duplicate for seamless loop #}
+        {% for book in book_covers %}
+        <img class="book-cover-item" src="{{ book.cover_url }}" alt="{{ book.title or 'Book cover' }}" loading="lazy">
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{# ===== Slim Hero ===== #}
+<div class="hero-slim hero-home text-center relative overflow-hidden">
     <div class="relative z-10">
-        <h1 class="text-5xl md:text-7xl font-serif font-bold text-warm-800 dark:text-warm-100 mb-4">Shelf Aware</h1>
-        <p class="text-xl md:text-2xl text-warm-500 dark:text-warm-400 font-display italic mb-3">What your bookshelf says about you</p>
-        <p class="text-warm-400 dark:text-warm-400 max-w-xl mx-auto mb-10">
-            Submit your Goodreads profile to request an analysis. We'll dig through your reading history and send you a link to your results.
+        <h1 class="text-5xl md:text-7xl font-serif font-bold text-warm-800 dark:text-warm-100 mb-3">Shelf Aware</h1>
+        <p class="text-xl md:text-2xl text-warm-500 dark:text-warm-400 font-display italic mb-4">What your bookshelf says about you</p>
+        <p class="text-warm-400 dark:text-warm-400 max-w-lg mx-auto mb-8 text-sm">
+            We dig through your Goodreads history and tell you exactly what kind of reader you are — whether you want to know or not.
         </p>
-
-        <!-- Request Forms Card -->
-        <div class="card p-8 max-w-xl mx-auto text-left">
-            <!-- Tabs -->
-            <div class="flex border-b border-warm-200 dark:border-warm-700 mb-6">
-                <button id="tab-profile"
-                    onclick="switchTab('profile')"
-                    class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-amber-600 text-amber-700 dark:text-amber-400 -mb-px">
-                    Request Analysis
-                </button>
-                <button id="tab-comparison"
-                    onclick="switchTab('comparison')"
-                    class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-warm-400 hover:text-warm-600 dark:hover:text-warm-200 -mb-px">
-                    Request Comparison
-                </button>
-            </div>
-
-            <!-- Profile tab -->
-            <div id="panel-profile">
-                <form method="POST" action="/request/profile" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Your name (optional)</label>
-                        <input type="text" name="name" placeholder="e.g. Jane"
-                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Goodreads profile URL <span class="text-red-400">*</span></label>
-                        <input type="url" name="goodreads_url" required
-                            placeholder="https://www.goodreads.com/user/show/12345"
-                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-4 py-2 text-sm transition-colors">
-                        Request Analysis
-                    </button>
-                </form>
-            </div>
-
-            <!-- Comparison tab -->
-            <div id="panel-comparison" class="hidden">
-                <form method="POST" action="/request/comparison" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Your name (optional)</label>
-                        <input type="text" name="name" placeholder="e.g. Jane"
-                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Your Goodreads URL <span class="text-red-400">*</span></label>
-                        <input type="url" name="goodreads_url_1" required
-                            placeholder="https://www.goodreads.com/user/show/12345"
-                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Friend's Goodreads URL <span class="text-red-400">*</span></label>
-                        <input type="url" name="goodreads_url_2" required
-                            placeholder="https://www.goodreads.com/user/show/67890"
-                            class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-4 py-2 text-sm transition-colors">
-                        Request Comparison
-                    </button>
-                </form>
-            </div>
+        <div class="flex flex-wrap gap-3 justify-center">
+            <a href="#get-started"
+               class="inline-block bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-6 py-2.5 text-sm transition-colors">
+                Analyze My Shelf
+            </a>
+            <a href="#get-started"
+               data-tab="comparison"
+               class="inline-block border border-warm-300 dark:border-warm-600 text-warm-700 dark:text-warm-300 hover:bg-warm-100 dark:hover:bg-warm-800 font-semibold rounded-lg px-6 py-2.5 text-sm transition-colors">
+                Compare Shelves
+            </a>
         </div>
     </div>
 </div>
 
-<!-- Flash banners -->
-{% if success == 'profile' %}
-<div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-4 mb-8 max-w-xl mx-auto text-center">
-    Request received! We'll run your analysis and get back to you soon.
-</div>
-{% elif success == 'comparison' %}
-<div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-4 mb-8 max-w-xl mx-auto text-center">
-    Comparison request received! We'll run the analysis and get back to you soon.
-</div>
-{% endif %}
+{# ===== Sticky In-Page Anchor Nav ===== #}
+<nav class="section-nav" id="home-section-nav">
+    <div class="section-nav-inner">
+        <a href="#stats" class="section-nav-item">Stats</a>
+        {% if recent %}
+        <a href="#recent" class="section-nav-item">Recent Profiles</a>
+        {% endif %}
+        {% if recent_comparisons %}
+        <a href="#head-to-head" class="section-nav-item">Head-to-Head</a>
+        {% endif %}
+        <a href="#get-started" class="section-nav-item">Get Started</a>
+    </div>
+</nav>
 
-{% if error %}
-<div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg p-4 mb-8 max-w-xl mx-auto text-center">
-    {{ error }}
-</div>
-{% endif %}
-
+{# ===== Stats Bento Grid ===== #}
 {% if platform_stats and platform_stats.total_profiles >= 1 %}
-<section class="mb-10">
-    <div class="section-divider mb-10"></div>
+<section id="stats" class="mb-12 scroll-mt-16">
 
-    <!-- Row 1: Platform Vitals -->
+    {# Row 1: Big numbers #}
     <div class="card p-6 mb-4">
-        <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-center">
+        <div class="flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-center">
             <div>
                 <div class="text-4xl font-bold font-display text-warm-800 dark:text-warm-100">
                     {{ platform_stats.total_profiles | format_number }}
@@ -123,19 +82,42 @@
                 </div>
                 <div class="text-xs text-warm-400 uppercase tracking-wider mt-1">Relationships Tested</div>
             </div>
+            {% if platform_stats.avg_books_per_reader %}
+            <div class="hidden sm:block h-10 w-px bg-warm-200 dark:bg-warm-700"></div>
+            <div>
+                <div class="text-4xl font-bold font-display text-warm-800 dark:text-warm-100">
+                    {{ platform_stats.avg_books_per_reader | format_number }}
+                </div>
+                <div class="text-xs text-warm-400 uppercase tracking-wider mt-1">Avg Books per Reader</div>
+            </div>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Row 2: Personality Cards -->
-    {% if platform_stats.hype_pct is not none or platform_stats.dominant_archetype or platform_stats.avg_rating_delta is not none %}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    {# Row 2: Archetype breakdown + Hype vs Critic #}
+    {% if platform_stats.archetype_breakdown | length > 1 or platform_stats.hype_pct is not none %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
 
-        <!-- Vibe Split -->
+        {% if platform_stats.archetype_breakdown | length > 1 %}
+        <div class="card p-5">
+            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-4">Reader Archetypes</div>
+            <canvas id="archetype-donut" height="180"></canvas>
+            <div class="mt-3 space-y-1">
+                {% for item in platform_stats.archetype_breakdown %}
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-warm-600 dark:text-warm-300">{{ item.archetype }}</span>
+                    <span class="text-warm-400">{{ item.pct }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
         {% if platform_stats.hype_pct is not none %}
         <div class="card p-5">
             <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">Community Vibe</div>
             <div class="flex justify-between text-sm font-display mb-2">
-                <span class="text-amber-600 dark:text-amber-400 font-semibold">{{ platform_stats.hype_pct }}% Hype Beasts</span>
+                <span class="text-amber-600 dark:text-amber-400 font-semibold">{{ platform_stats.hype_pct }}% Generous Raters</span>
                 <span class="text-blue-600 dark:text-blue-400 font-semibold">{{ platform_stats.critic_pct }}% Critics</span>
             </div>
             <div class="h-3 rounded-full overflow-hidden bg-blue-200 dark:bg-blue-900">
@@ -143,84 +125,134 @@
                      style="width: {{ platform_stats.hype_pct }}%"></div>
             </div>
             <p class="text-xs text-warm-400 mt-2 italic">Easily pleased vs. tough critics</p>
-        </div>
-        {% endif %}
-
-        <!-- Dominant Archetype -->
-        {% if platform_stats.dominant_archetype %}
-        <div class="card p-5">
-            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">Most Common Diagnosis</div>
-            <div class="text-lg font-display font-semibold text-warm-800 dark:text-warm-100 italic">
-                "{{ platform_stats.dominant_archetype }}"
+            {% if platform_stats.avg_rating_delta is not none %}
+            <div class="mt-4 pt-4 border-t border-warm-100 dark:border-warm-700">
+                <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">vs. Goodreads Average</div>
+                {% set delta = platform_stats.avg_rating_delta %}
+                <div class="text-2xl font-bold font-display {% if delta < 0 %}text-red-500 dark:text-red-400{% else %}text-green-500 dark:text-green-400{% endif %}">
+                    {% if delta >= 0 %}+{% endif %}{{ "%.2f"|format(delta) }}★
+                </div>
+                <p class="text-xs text-warm-400 mt-1 italic">
+                    {% if delta < 0 %}We don't trust the hype.{% else %}We're easily entertained.{% endif %}
+                </p>
             </div>
-            <p class="text-xs text-warm-400 mt-2">The most prevalent reader archetype</p>
-        </div>
-        {% endif %}
-
-        <!-- Rating Delta -->
-        {% if platform_stats.avg_rating_delta is not none %}
-        <div class="card p-5">
-            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">vs. Goodreads Average</div>
-            {% set delta = platform_stats.avg_rating_delta %}
-            <div class="text-3xl font-bold font-display {% if delta < 0 %}text-red-500 dark:text-red-400{% else %}text-green-500 dark:text-green-400{% endif %}">
-                {% if delta >= 0 %}+{% endif %}{{ "%.2f"|format(delta) }}★
-            </div>
-            <p class="text-xs text-warm-400 mt-2 italic">
-                {% if delta < 0 %}We don't trust the hype.{% else %}We're easily entertained.{% endif %}
-            </p>
+            {% endif %}
         </div>
         {% endif %}
 
     </div>
     {% endif %}
+
+    {# Row 3: Top Genres + Reading Eras #}
+    {% if platform_stats.top_genres or (era_dist and era_dist['labels']) %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+
+        {% if platform_stats.top_genres %}
+        <div class="card p-5">
+            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-4">Top Genres</div>
+            {% set max_genre = platform_stats.top_genres[0].count %}
+            {% for item in platform_stats.top_genres %}
+            <div class="stat-bar-row">
+                <div class="stat-bar-label" title="{{ item.genre }}">{{ item.genre }}</div>
+                <div class="stat-bar-track">
+                    <div class="stat-bar-fill" style="width: {{ (item.count / max_genre * 100) | int }}%"></div>
+                </div>
+                <div class="stat-bar-count">{{ item.count }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if era_dist and era_dist['labels'] %}
+        <div class="card p-5">
+            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-4">Reading Eras</div>
+            {% set era_values = era_dist['values'] %}
+            {% set max_era = era_values | max %}
+            {% for i in range(era_dist['labels'] | length) %}
+            <div class="stat-bar-row">
+                <div class="stat-bar-label">{{ era_dist['labels'][i] }}</div>
+                <div class="stat-bar-track">
+                    <div class="stat-bar-fill era-fill" style="width: {{ (era_values[i] / max_era * 100) | int if max_era else 0 }}%"></div>
+                </div>
+                <div class="stat-bar-count">{{ era_values[i] }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+    {% endif %}
+
+    {# Row 4: Patron Saint + Overrated Book #}
+    {% if platform_stats.patron_saint or (platform_stats.overrated_book and platform_stats.overrated_book.cover_url) %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        {% if platform_stats.patron_saint %}
+        <div class="card p-5">
+            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">Patron Saint</div>
+            <div class="flex items-center gap-4">
+                {% if platform_stats.patron_saint.covers %}
+                <div class="book-cover-stack">
+                    {% for cover in platform_stats.patron_saint.covers %}
+                    <img src="{{ cover }}" alt="Book cover" loading="lazy">
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <div>
+                    <div class="text-lg font-display font-semibold text-warm-800 dark:text-warm-100">
+                        {{ platform_stats.patron_saint.author }}
+                    </div>
+                    <div class="text-xs text-warm-400 mt-1">
+                        {{ platform_stats.patron_saint.book_count }} books consumed platform-wide
+                    </div>
+                    <div class="text-xs text-warm-300 dark:text-warm-500 mt-2 italic">The author we can't quit</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if platform_stats.overrated_book and platform_stats.overrated_book.cover_url %}
+        <div class="card p-5">
+            <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">Most Overrated</div>
+            <div class="flex items-center gap-4">
+                <div class="overrated-wrap">
+                    <img src="{{ platform_stats.overrated_book.cover_url }}"
+                         alt="{{ platform_stats.overrated_book.title }}"
+                         loading="lazy">
+                    <span class="overrated-stamp">Overrated</span>
+                </div>
+                <div>
+                    <div class="text-sm font-display font-semibold text-warm-800 dark:text-warm-100 leading-tight">
+                        {{ platform_stats.overrated_book.title }}
+                    </div>
+                    <div class="text-xs text-warm-500 dark:text-warm-400 mt-1">{{ platform_stats.overrated_book.author }}</div>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-xs font-semibold text-red-500 dark:text-red-400">
+                            We gave it {{ "%.1f"|format(platform_stats.overrated_book.user_rating) }}★
+                        </span>
+                        <span class="text-warm-300 dark:text-warm-600 text-xs">·</span>
+                        <span class="text-xs text-warm-400">
+                            GR avg {{ "%.1f"|format(platform_stats.overrated_book.goodreads_avg) }}★
+                        </span>
+                    </div>
+                    <div class="text-xs text-warm-300 dark:text-warm-500 mt-1 italic">
+                        We were {{ (platform_stats.overrated_book.delta | abs) | round(1) }} stars harsher than everyone else
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+    {% endif %}
+
 </section>
 {% endif %}
 
-<!-- How It Works -->
-<section class="mb-16">
-    <div class="section-divider mb-10"></div>
-    <h2 class="text-2xl font-serif font-bold text-center mb-10 text-warm-800 dark:text-warm-100">How It Works</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-        <div class="text-center">
-            <div class="step-number mx-auto mb-4">1</div>
-            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">Submit Your URL</h3>
-            <p class="text-warm-400 text-sm">Enter your Goodreads profile URL in the form above</p>
-        </div>
-        <div class="text-center">
-            <div class="step-number mx-auto mb-4">2</div>
-            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">We Run the Analysis</h3>
-            <p class="text-warm-400 text-sm">We dig through your reading history and build your profile — usually within a day</p>
-        </div>
-        <div class="text-center">
-            <div class="step-number mx-auto mb-4">3</div>
-            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">Get Your Results</h3>
-            <p class="text-warm-400 text-sm">You'll get a shareable link to your personality profile, roast, and book recommendations</p>
-        </div>
-    </div>
-</section>
-
-<script>
-function switchTab(tab) {
-    ['profile', 'comparison'].forEach(function(t) {
-        var btn = document.getElementById('tab-' + t);
-        var panel = document.getElementById('panel-' + t);
-        if (t === tab) {
-            btn.classList.add('border-amber-600', 'text-amber-700', 'dark:text-amber-400');
-            btn.classList.remove('border-transparent', 'text-warm-400');
-            panel.classList.remove('hidden');
-        } else {
-            btn.classList.remove('border-amber-600', 'text-amber-700', 'dark:text-amber-400');
-            btn.classList.add('border-transparent', 'text-warm-400');
-            panel.classList.add('hidden');
-        }
-    });
-}
-</script>
-
-<!-- Recent Analyses -->
+{# ===== Recent Analyses ===== #}
 {% if recent %}
-<section>
-    <div class="section-divider mb-10"></div>
+<section id="recent" class="mb-12 scroll-mt-16">
+    <div class="section-divider mb-8"></div>
     <h2 class="text-2xl font-serif font-bold mb-8 text-warm-800 dark:text-warm-100">Recent Analyses</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {% for profile in recent %}
@@ -247,9 +279,10 @@ function switchTab(tab) {
 </section>
 {% endif %}
 
+{# ===== Head-to-Head ===== #}
 {% if recent_comparisons %}
-<section>
-    <div class="section-divider mb-10"></div>
+<section id="head-to-head" class="mb-12 scroll-mt-16">
+    <div class="section-divider mb-8"></div>
     <h2 class="text-2xl font-serif font-bold mb-2 text-warm-800 dark:text-warm-100">Head-to-Head</h2>
     <p class="text-warm-400 mb-8 text-sm">Compare two readers' shelves to find out how compatible they really are</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -276,4 +309,198 @@ function switchTab(tab) {
     </div>
 </section>
 {% endif %}
+
+{# ===== Get Started ===== #}
+<section id="get-started" class="mb-12 scroll-mt-16">
+    <div class="section-divider mb-8"></div>
+
+    {# How It Works #}
+    <h2 class="text-2xl font-serif font-bold text-center mb-10 text-warm-800 dark:text-warm-100">How It Works</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto mb-12">
+        <div class="text-center">
+            <div class="step-number mx-auto mb-4">1</div>
+            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">Submit Your URL</h3>
+            <p class="text-warm-400 text-sm">Enter your Goodreads profile URL in the form below</p>
+        </div>
+        <div class="text-center">
+            <div class="step-number mx-auto mb-4">2</div>
+            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">We Run the Analysis</h3>
+            <p class="text-warm-400 text-sm">We dig through your reading history and build your profile — usually within a day</p>
+        </div>
+        <div class="text-center">
+            <div class="step-number mx-auto mb-4">3</div>
+            <h3 class="font-semibold text-warm-700 dark:text-warm-200 mb-2">Get Your Results</h3>
+            <p class="text-warm-400 text-sm">You'll get a shareable link to your personality profile, roast, and book recommendations</p>
+        </div>
+    </div>
+
+    {# Flash banners #}
+    {% if success == 'profile' %}
+    <div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-4 mb-6 max-w-xl mx-auto text-center">
+        Request received! We'll run your analysis and get back to you soon.
+    </div>
+    {% elif success == 'comparison' %}
+    <div class="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-4 mb-6 max-w-xl mx-auto text-center">
+        Comparison request received! We'll run the analysis and get back to you soon.
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div class="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-lg p-4 mb-6 max-w-xl mx-auto text-center">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {# Request Form Card #}
+    <div class="card p-8 max-w-xl mx-auto text-left">
+        <div class="flex border-b border-warm-200 dark:border-warm-700 mb-6">
+            <button id="tab-profile"
+                onclick="switchTab('profile')"
+                class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-amber-600 text-amber-700 dark:text-amber-400 -mb-px">
+                Request Analysis
+            </button>
+            <button id="tab-comparison"
+                onclick="switchTab('comparison')"
+                class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-warm-400 hover:text-warm-600 dark:hover:text-warm-200 -mb-px">
+                Request Comparison
+            </button>
+        </div>
+
+        <div id="panel-profile">
+            <form method="POST" action="/request/profile" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Your name (optional)</label>
+                    <input type="text" name="name" placeholder="e.g. Jane"
+                        class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Goodreads profile URL <span class="text-red-400">*</span></label>
+                    <input type="url" name="goodreads_url" required
+                        placeholder="https://www.goodreads.com/user/show/12345"
+                        class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <button type="submit"
+                    class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-4 py-2 text-sm transition-colors">
+                    Request Analysis
+                </button>
+            </form>
+        </div>
+
+        <div id="panel-comparison" class="hidden">
+            <form method="POST" action="/request/comparison" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Your name (optional)</label>
+                    <input type="text" name="name" placeholder="e.g. Jane"
+                        class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Your Goodreads URL <span class="text-red-400">*</span></label>
+                    <input type="url" name="goodreads_url_1" required
+                        placeholder="https://www.goodreads.com/user/show/12345"
+                        class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-warm-500 dark:text-warm-400 uppercase tracking-wide mb-1">Friend's Goodreads URL <span class="text-red-400">*</span></label>
+                    <input type="url" name="goodreads_url_2" required
+                        placeholder="https://www.goodreads.com/user/show/67890"
+                        class="w-full rounded-lg border border-warm-200 dark:border-warm-600 bg-white dark:bg-warm-800 text-warm-800 dark:text-warm-100 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+                <button type="submit"
+                    class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg px-4 py-2 text-sm transition-colors">
+                    Request Comparison
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+{% if platform_stats and platform_stats.archetype_breakdown | length > 1 %}
+(function() {
+    var archetypeData = {{ platform_stats.archetype_breakdown | tojson }};
+    var canvas = document.getElementById('archetype-donut');
+    if (!canvas) return;
+    var chart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: archetypeData.map(function(d) { return d.archetype; }),
+            datasets: [{
+                data: archetypeData.map(function(d) { return d.count; }),
+                backgroundColor: ['#D97706','#F59E0B','#B45309','#FBBF24','#92400E'],
+                borderWidth: 0,
+            }]
+        },
+        options: {
+            cutout: '65%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                            var pct = Math.round(ctx.parsed * 100 / total);
+                            return ctx.label + ': ' + pct + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    window.addEventListener('darkModeToggle', function(e) {
+        chart.options.color = e.detail.dark ? '#9C8E7C' : '#6B5E50';
+        chart.update();
+    });
+})();
+{% endif %}
+
+function switchTab(tab) {
+    ['profile', 'comparison'].forEach(function(t) {
+        var btn = document.getElementById('tab-' + t);
+        var panel = document.getElementById('panel-' + t);
+        if (t === tab) {
+            btn.classList.add('border-amber-600', 'text-amber-700', 'dark:text-amber-400');
+            btn.classList.remove('border-transparent', 'text-warm-400');
+            panel.classList.remove('hidden');
+        } else {
+            btn.classList.remove('border-amber-600', 'text-amber-700', 'dark:text-amber-400');
+            btn.classList.add('border-transparent', 'text-warm-400');
+            panel.classList.add('hidden');
+        }
+    });
+}
+
+// Anchor buttons in hero set form tab on click
+document.querySelectorAll('a[data-tab]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var tab = btn.getAttribute('data-tab');
+        switchTab(tab);
+    });
+});
+
+// IntersectionObserver: highlight active section in sticky nav
+(function() {
+    var navItems = document.querySelectorAll('#home-section-nav .section-nav-item');
+    var sections = [];
+    navItems.forEach(function(item) {
+        var id = item.getAttribute('href').replace('#', '');
+        var el = document.getElementById(id);
+        if (el) sections.push({ id: id, el: el, navItem: item });
+    });
+
+    if (!sections.length) return;
+
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                sections.forEach(function(s) {
+                    s.navItem.classList.toggle('active', s.el === entry.target);
+                });
+            }
+        });
+    }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+
+    sections.forEach(function(s) { observer.observe(s.el); });
+})();
+</script>
+
 {% endblock %}

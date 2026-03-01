@@ -9,9 +9,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from server.database import (close_pool, ensure_requests_table, get_analytics,
-                              get_pending_requests, get_platform_stats,
+                              get_era_distribution, get_pending_requests,
+                              get_platform_book_covers, get_platform_stats,
                               get_recent_comparisons, get_recent_profiles,
-                              init_pool, log_page_view, store_request)
+                              get_roast_snippets, init_pool, log_page_view,
+                              store_request)
 from server.routers import comparisons, profiles
 from server.routers.profiles import _get_client_ip, slugify
 
@@ -40,10 +42,13 @@ app.include_router(comparisons.router)
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    recent, recent_comparisons, platform_stats = await asyncio.gather(
+    recent, recent_comparisons, platform_stats, roast_snippets, era_dist, book_covers = await asyncio.gather(
         get_recent_profiles(limit=12),
         get_recent_comparisons(limit=6),
         get_platform_stats(),
+        get_roast_snippets(),
+        get_era_distribution(),
+        get_platform_book_covers(limit=100),
     )
     asyncio.create_task(log_page_view(
         "home", None,
@@ -56,6 +61,9 @@ async def home(request: Request):
             "recent": recent,
             "recent_comparisons": recent_comparisons,
             "platform_stats": platform_stats,
+            "roast_snippets": roast_snippets,
+            "era_dist": era_dist,
+            "book_covers": book_covers,
             "success": request.query_params.get("success"),
             "error": request.query_params.get("error"),
         }
