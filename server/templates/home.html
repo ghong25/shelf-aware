@@ -126,7 +126,7 @@
             </div>
             <p class="text-xs text-warm-400 mt-2 italic">Easily pleased vs. tough critics</p>
             {% if platform_stats.avg_rating_delta is not none %}
-            <div class="mt-4 pt-4 border-t border-warm-100 dark:border-warm-700">
+            <div class="mt-4 pt-4 border-t border-warm-100 dark:border-warm-700 text-center">
                 <div class="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">vs. Goodreads Average</div>
                 {% set delta = platform_stats.avg_rating_delta %}
                 <div class="text-2xl font-bold font-display {% if delta < 0 %}text-red-500 dark:text-red-400{% else %}text-green-500 dark:text-green-400{% endif %}">
@@ -418,37 +418,39 @@
 {% if platform_stats and platform_stats.archetype_breakdown | length > 1 %}
 (function() {
     var archetypeData = {{ platform_stats.archetype_breakdown | tojson }};
-    var canvas = document.getElementById('archetype-donut');
-    if (!canvas) return;
-    var chart = new Chart(canvas, {
-        type: 'doughnut',
-        data: {
-            labels: archetypeData.map(function(d) { return d.archetype; }),
-            datasets: [{
-                data: archetypeData.map(function(d) { return d.count; }),
-                backgroundColor: ['#D97706','#F59E0B','#B45309','#FBBF24','#92400E'],
-                borderWidth: 0,
-            }]
-        },
-        options: {
-            cutout: '65%',
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(ctx) {
-                            var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
-                            var pct = Math.round(ctx.parsed * 100 / total);
-                            return ctx.label + ': ' + pct + '%';
+    function renderArchetypeChart() {
+        var canvas = document.getElementById('archetype-donut');
+        if (!canvas) return;
+        new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels: archetypeData.map(function(d) { return d.archetype; }),
+                datasets: [{
+                    data: archetypeData.map(function(d) { return d.count; }),
+                    backgroundColor: ['#D97706','#F59E0B','#B45309','#FBBF24','#92400E'],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                cutout: '65%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                var total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+                                var pct = Math.round(ctx.parsed * 100 / total);
+                                return ctx.label + ': ' + pct + '%';
+                            }
                         }
                     }
                 }
             }
-        }
-    });
-    window.addEventListener('darkModeToggle', function(e) {
-        chart.options.color = e.detail.dark ? '#9C8E7C' : '#6B5E50';
-        chart.update();
+        });
+    }
+    renderArchetypeChart();
+    window.addEventListener('darkModeToggle', function() {
+        setTimeout(renderArchetypeChart, 0);
     });
 })();
 {% endif %}
