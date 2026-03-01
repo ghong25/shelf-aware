@@ -659,7 +659,7 @@
 
     // Tab bar click handler
     document.querySelectorAll('.tab-item').forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        btn.addEventListener('click', () => { if (btn.dataset.tab) switchTab(btn.dataset.tab); });
     });
 
     // Restore tab from hash or default to overview
