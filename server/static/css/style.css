@@ -619,6 +619,26 @@ html.dark .step-number {
     scroll-margin-top: 72px;
 }
 
+.toc-scroll-top {
+    display: block;
+    width: 100%;
+    margin-top: 0.625rem;
+    padding: 0.375rem 0.5rem;
+    border: none;
+    border-top: 1px solid #E8E0D4;
+    background: none;
+    color: #9C8E7C;
+    font-size: 0.7375rem;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 0;
+    transition: color 0.15s ease;
+}
+
+.toc-scroll-top:hover {
+    color: #B45309;
+}
+
 /* Dark mode TOC */
 html.dark .tab-toc {
     background: #2D2319;
@@ -645,6 +665,15 @@ html.dark .tab-toc .toc-link.active {
     background: rgba(61, 52, 41, 0.8);
     border-left-color: #F59E0B;
     font-weight: 500;
+}
+
+html.dark .toc-scroll-top {
+    border-top-color: #3D3429;
+    color: #6B5E50;
+}
+
+html.dark .toc-scroll-top:hover {
+    color: #D97706;
 }
 
 /* ===== Marquee Ticker ===== */

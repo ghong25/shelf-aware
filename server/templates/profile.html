@@ -587,6 +587,7 @@
         sections.forEach(s => {
             html += `<a href="#${s.id}" class="toc-link" data-toc-target="${s.id}">${s.dataset.tocLabel}</a>`;
         });
+        html += `<button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="toc-scroll-top">↑ Back to top</button>`;
         toc.innerHTML = html;
 
         toc.querySelectorAll('.toc-link').forEach(link => {

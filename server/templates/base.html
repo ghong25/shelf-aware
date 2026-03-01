@@ -112,22 +112,5 @@
     </script>
     {% block scripts %}{% endblock %}
 
-    <button id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})"
-      style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;padding:0.625rem;border-radius:9999px;background:rgba(45,35,25,0.8);color:#FFFBF5;box-shadow:0 4px 12px rgba(0,0,0,0.2);opacity:0;pointer-events:none;transition:opacity 0.3s,transform 0.3s;border:none;cursor:pointer;backdrop-filter:blur(4px)"
-      aria-label="Scroll to top">
-      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
-      </svg>
-    </button>
-    <script>
-      (function() {
-        var btn = document.getElementById('scroll-top-btn');
-        window.addEventListener('scroll', function() {
-          var show = window.scrollY > 300;
-          btn.style.opacity = show ? '1' : '0';
-          btn.style.pointerEvents = show ? 'auto' : 'none';
-        }, { passive: true });
-      })();
-    </script>
 </body>
 </html>
