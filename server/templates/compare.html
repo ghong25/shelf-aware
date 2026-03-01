@@ -3,15 +3,15 @@
 {% block title %}{{ profile_a.username }} vs {{ profile_b.username }} - Shelf Aware{% endblock %}
 
 {% set rating_descriptions = {
-    "Hype Machine": "Consistently rates above average — champions books the world underestimates",
-    "Enthusiast": "Generous and enthusiastic, ratings tend above the consensus",
-    "Generous Reader": "Kinder than most — ratings lean warmly positive",
-    "Wild Card": "Unpredictable rater — loves some books the world hates, and pans some it loves",
-    "Straight Shooter": "Ratings closely track the crowd's consensus",
-    "Plays It Safe": "Rarely strays far from the mainstream opinion",
-    "Tough Grader": "Holds books to a high standard; ratings often fall below average",
-    "Ruthless Critic": "Uncompromising — rarely hands out high ratings",
-    "Contrarian": "Almost always rates lower than the crowd. Sees through the hype",
+    "Rose-Tinted": "You rate above the crowd average for the vast majority of books you read. You tend to see the best in what you pick up — or you're just very good at choosing books you'll love.",
+    "Enthusiast": "You give above-average ratings often and with conviction. You come to books with energy and leave with stars — your opinions are strong and they lean warm.",
+    "Generous Reader": "Your ratings run slightly above the crowd average, but not dramatically so. You're a charitable judge — willing to give books a little extra credit when they try.",
+    "Wild Card": "You diverge from the crowd frequently, but in no consistent direction — sometimes much higher, sometimes much lower. Your taste is strong and hard to predict.",
+    "The Consensus": "Your ratings track close to the crowd, but not because you're passive — you've just developed tastes that happen to align with the consensus more often than not.",
+    "The Conformist": "Your ratings closely mirror what most other readers give. You rarely diverge from the crowd — whether because you read selectively, trust popular consensus, or haven't hit a book that sparked a strong reaction.",
+    "Tough Grader": "You tend to be more critical than the average reader, but not dramatically. You withhold that last star when others might round up — a high bar, applied consistently.",
+    "Ruthless Critic": "You rate below the crowd regularly and with conviction. You hold books to a high standard and don't hand out stars easily — even when everyone else loved it.",
+    "Contrarian": "You almost always rate books below their crowd average. Whether by demanding standards, genuinely different taste, or a natural skepticism toward popular consensus — your library runs colder than most.",
     "Unknown": "",
 } %}
 
@@ -172,9 +172,15 @@
                     <p class="text-warm-400">Books</p>
                 </div>
                 {% if stats_a.get('hater_hype') %}
-                <div>
-                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats_a.hater_hype.label }}</p>
+                <div class="relative group">
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100 cursor-default">{{ stats_a.hater_hype.label }}</p>
                     <p class="text-warm-400">Rating Style</p>
+                    {% if stats_a.hater_hype.label in rating_descriptions %}
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-warm-900 dark:bg-warm-100 text-warm-100 dark:text-warm-900 text-xs rounded px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                        {{ rating_descriptions[stats_a.hater_hype.label] }}
+                        <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-warm-900 dark:border-t-warm-100"></div>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
                 {% if stats_a.get('attention_span') %}
@@ -199,9 +205,15 @@
                     <p class="text-warm-400">Books</p>
                 </div>
                 {% if stats_b.get('hater_hype') %}
-                <div>
-                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats_b.hater_hype.label }}</p>
+                <div class="relative group">
+                    <p class="text-2xl font-bold text-warm-800 dark:text-warm-100 cursor-default">{{ stats_b.hater_hype.label }}</p>
                     <p class="text-warm-400">Rating Style</p>
+                    {% if stats_b.hater_hype.label in rating_descriptions %}
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-warm-900 dark:bg-warm-100 text-warm-100 dark:text-warm-900 text-xs rounded px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                        {{ rating_descriptions[stats_b.hater_hype.label] }}
+                        <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-warm-900 dark:border-t-warm-100"></div>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
                 {% if stats_b.get('attention_span') %}
@@ -263,19 +275,29 @@
         <h3 class="font-display font-semibold text-lg mb-4 text-warm-700 dark:text-warm-200">Rating Personality</h3>
         <div class="grid grid-cols-2 gap-6">
             <div class="text-center">
-                <p class="text-xl font-bold text-amber-700 dark:text-amber-400">{{ rc.user_a.label }}</p>
+                <div class="relative group inline-block">
+                    <p class="text-xl font-bold text-amber-700 dark:text-amber-400 cursor-default">{{ rc.user_a.label }}</p>
+                    {% if rc.user_a.label in rating_descriptions and rating_descriptions[rc.user_a.label] %}
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-warm-900 dark:bg-warm-100 text-warm-100 dark:text-warm-900 text-xs rounded px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                        {{ rating_descriptions[rc.user_a.label] }}
+                        <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-warm-900 dark:border-t-warm-100"></div>
+                    </div>
+                    {% endif %}
+                </div>
                 <p class="text-warm-400 text-sm mt-1">{{ rc.user_a.name }}</p>
-                {% if rc.user_a.label in rating_descriptions and rating_descriptions[rc.user_a.label] %}
-                <p class="text-warm-500 dark:text-warm-400 text-xs mt-2 italic max-w-xs mx-auto">{{ rating_descriptions[rc.user_a.label] }}</p>
-                {% endif %}
                 <p class="text-warm-300 dark:text-warm-600 text-xs mt-3">Avg {{ rc.user_a.average_rating }} &middot; {{ rc.user_a.pct_5_star }}% five-star</p>
             </div>
             <div class="text-center">
-                <p class="text-xl font-bold text-cyan-700 dark:text-cyan-400">{{ rc.user_b.label }}</p>
+                <div class="relative group inline-block">
+                    <p class="text-xl font-bold text-cyan-700 dark:text-cyan-400 cursor-default">{{ rc.user_b.label }}</p>
+                    {% if rc.user_b.label in rating_descriptions and rating_descriptions[rc.user_b.label] %}
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-warm-900 dark:bg-warm-100 text-warm-100 dark:text-warm-900 text-xs rounded px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                        {{ rating_descriptions[rc.user_b.label] }}
+                        <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-warm-900 dark:border-t-warm-100"></div>
+                    </div>
+                    {% endif %}
+                </div>
                 <p class="text-warm-400 text-sm mt-1">{{ rc.user_b.name }}</p>
-                {% if rc.user_b.label in rating_descriptions and rating_descriptions[rc.user_b.label] %}
-                <p class="text-warm-500 dark:text-warm-400 text-xs mt-2 italic max-w-xs mx-auto">{{ rating_descriptions[rc.user_b.label] }}</p>
-                {% endif %}
                 <p class="text-warm-300 dark:text-warm-600 text-xs mt-3">Avg {{ rc.user_b.average_rating }} &middot; {{ rc.user_b.pct_5_star }}% five-star</p>
             </div>
         </div>

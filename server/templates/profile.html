@@ -5,6 +5,18 @@
 {% set has_ai = ai.get('deep_profile') or ai.get('psychological') or ai.get('vibe_check') or ai.get('red_green_flags') or ai.get('roast') or ai.get('blind_spots') or ai.get('reading_evolution') %}
 {% set has_recs = ai.get('recommendations') %}
 
+{% set rating_descriptions = {
+    "Rose-Tinted": "Rates above the crowd average for the vast majority of books. Tends to see the best in what they pick up — or is very good at choosing books they'll love.",
+    "Enthusiast": "Gives above-average ratings often and with conviction. Comes to books with energy and leaves with stars — opinions are strong and lean warm.",
+    "Generous Reader": "Ratings run slightly above the crowd average, but not dramatically so. A charitable judge — willing to give books a little extra credit when they try.",
+    "Wild Card": "Diverges from the crowd frequently, but in no consistent direction — sometimes much higher, sometimes much lower. Taste is strong and hard to predict.",
+    "The Consensus": "Ratings track close to the crowd, but not out of passivity — just tastes that happen to align with the consensus more often than not.",
+    "The Conformist": "Ratings closely mirror what most other readers give. Rarely diverges from the crowd — whether from reading selectively, trusting popular consensus, or not yet finding a book that sparked a strong reaction.",
+    "Tough Grader": "More critical than the average reader, but not dramatically so. Withholds that last star when others might round up — a high bar, applied consistently.",
+    "Ruthless Critic": "Rates below the crowd regularly and with conviction. Holds books to a high standard and doesn't hand out stars easily — even when everyone else loved it.",
+    "Contrarian": "Almost always rates books below their crowd average. Whether by demanding standards, genuinely different taste, or natural skepticism toward popular consensus — this library runs colder than most.",
+} %}
+
 {% block content %}
 <!-- ==================== HERO IDENTITY CARD ==================== -->
 <div class="hero-identity p-8 md:p-10 mb-8">
@@ -24,9 +36,15 @@
                 <p class="text-warm-400 text-sm">Books Read</p>
             </div>
             {% if stats.get('hater_hype') and stats.hater_hype.total_rated %}
-            <div>
-                <p class="text-2xl font-bold text-warm-800 dark:text-warm-100">{{ stats.hater_hype.label }}</p>
+            <div class="relative group">
+                <p class="text-2xl font-bold text-warm-800 dark:text-warm-100 cursor-default">{{ stats.hater_hype.label }}</p>
                 <p class="text-warm-400 text-sm">Rating Style</p>
+                {% if stats.hater_hype.label in rating_descriptions %}
+                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-warm-900 dark:bg-warm-100 text-warm-100 dark:text-warm-900 text-xs rounded px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    {{ rating_descriptions[stats.hater_hype.label] }}
+                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-warm-900 dark:border-t-warm-100"></div>
+                </div>
+                {% endif %}
             </div>
             {% endif %}
             {% if stats.get('attention_span') and stats.attention_span.avg_pages %}
@@ -117,9 +135,15 @@
                 <p class="metric-label">Books Read</p>
             </div>
             {% if stats.get('hater_hype') and stats.hater_hype.total_rated %}
-            <div class="metric-card">
-                <p class="metric-value">{{ stats.hater_hype.label }}</p>
+            <div class="metric-card relative group">
+                <p class="metric-value cursor-default">{{ stats.hater_hype.label }}</p>
                 <p class="metric-label">Rating Style</p>
+                {% if stats.hater_hype.label in rating_descriptions %}
+                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-warm-900 dark:bg-warm-100 text-warm-100 dark:text-warm-900 text-xs rounded px-3 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    {{ rating_descriptions[stats.hater_hype.label] }}
+                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-warm-900 dark:border-t-warm-100"></div>
+                </div>
+                {% endif %}
             </div>
             {% endif %}
             {% if stats.get('attention_span') and stats.attention_span.avg_pages %}

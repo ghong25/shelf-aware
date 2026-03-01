@@ -89,7 +89,7 @@ def compute_hater_hype_index(books):
     if not diffs:
         return {
             "mean_diff": 0.0,
-            "label": "Straight Shooter",
+            "label": "The Consensus",
             "chart_data": {"labels": [], "values": []},
             "total_rated": 0,
         }
@@ -105,16 +105,16 @@ def compute_hater_hype_index(books):
     # Label based on direction AND intensity of strong opinions
     strong_pct = strong_opinions / total
     if strong_opinions == 0 or strong_pct < 0.15:
-        label = "Plays It Safe"
+        label = "The Conformist"
     else:
         hype_lean = hype_count / strong_opinions
         opinionated = strong_pct >= 0.60
         if hype_lean >= 0.75:
-            label = "Hype Machine"
+            label = "Rose-Tinted"
         elif hype_lean >= 0.58:
             label = "Enthusiast" if opinionated else "Generous Reader"
         elif hype_lean >= 0.42:
-            label = "Wild Card" if opinionated else "Straight Shooter"
+            label = "Wild Card" if opinionated else "The Consensus"
         elif hype_lean >= 0.25:
             label = "Ruthless Critic" if opinionated else "Tough Grader"
         else:
